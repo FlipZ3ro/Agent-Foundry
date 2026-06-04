@@ -1,0 +1,9 @@
+{
+  "name": "@agentic-factory/web",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "echo web placeholder"
+  }
+}

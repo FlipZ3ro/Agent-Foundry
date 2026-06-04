@@ -1,25 +1,64 @@
 # agentic-saas-factory
 
-Scaffold repo untuk membangun SaaS dengan pola planner + worker swarm + reviewer.
+Monorepo starter untuk membangun SaaS dengan pola **planner → worker swarm → reviewer**.
 
-## Scope awal
-- Belum ada API integration
-- Belum ada business logic production
-- Fokus: struktur monorepo, batas tanggung jawab, dan tempat kerja tiap layer
+## Isi sekarang
 
-## Arsitektur
-- `apps/web` — landing/marketing site
-- `apps/dashboard` — app shell SaaS
-- `services/orchestrator` — planner, task graph, dispatch
-- `services/worker` — worker executors
-- `services/reviewer` — review/merge/quality gate
-- `packages/*` — shared modules
-- `templates/*` — PRD/task spec templates
-- `docs/*` — architecture, plans, examples
+- TypeScript schemas untuk:
+  - blueprint
+  - task spec
+  - worker job
+  - worker result
+  - review decision
+- minimal service code:
+  - `services/orchestrator`
+  - `services/worker`
+  - `services/reviewer`
+- app placeholders:
+  - `apps/web`
+  - `apps/dashboard`
+- runnable demo:
+  - `npm run demo`
+
+## Repo map
+
+- `packages/schemas` — source of truth untuk contracts
+- `services/orchestrator` — planner + dispatch + run assembly
+- `services/worker` — worker abstraction
+- `services/reviewer` — quality gate abstraction
+- `apps/web` — landing/marketing shell placeholder
+- `apps/dashboard` — SaaS dashboard placeholder
+
+## Arsitektur saat ini
+
+1. planner bikin `ProjectBlueprint`
+2. orchestrator buat `WorkerJob[]`
+3. worker produce `WorkerResult[]`
+4. reviewer bikin `ReviewDecision[]`
+
+## Quick start
+
+```bash
+npm install
+npm run demo
+```
+
+Contoh output:
+
+```json
+{
+  "blueprint": { "...": "..." },
+  "jobs": [],
+  "results": [],
+  "reviews": []
+}
+```
 
 ## Next steps
-1. pilih stack frontend/backend final
-2. definisikan task graph schema
-3. definisikan worker contract
-4. tambahkan queue + state store
-5. tambahkan auth/billing setelah core orchestration stabil
+
+- tambah real queue / state store
+- tambah HTTP API
+- tambah auth + billing
+- tambah frontend app beneran
+- tambah lane-specific workers
+- tambah persisted run history

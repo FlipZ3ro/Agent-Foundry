@@ -1,16 +1,21 @@
 {
   "name": "agentic-saas-factory",
   "private": true,
-  "version": "0.1.0",
+  "type": "module",
+  "version": "0.2.0",
   "workspaces": [
     "apps/*",
     "services/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "echo 'scaffold only'",
-    "build": "echo 'scaffold only'",
-    "lint": "echo 'scaffold only'",
-    "test": "echo 'scaffold only'"
+    "build": "tsc -p tsconfig.build.json",
+    "build:core": "tsc -p tsconfig.build.json",
+    "lint": "echo 'lint pending'",
+    "test": "echo 'test pending'",
+    "demo": "npm run build:core && node dist/services/orchestrator/src/demo.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
   }
 }
