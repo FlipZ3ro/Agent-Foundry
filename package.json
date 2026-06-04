@@ -1,0 +1,16 @@
+{
+  "name": "agentic-saas-factory",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "echo 'scaffold only'",
+    "build": "echo 'scaffold only'",
+    "lint": "echo 'scaffold only'",
+    "test": "echo 'scaffold only'"
+  }
+}
