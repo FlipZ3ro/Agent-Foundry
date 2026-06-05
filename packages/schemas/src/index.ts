@@ -74,6 +74,8 @@ export interface OrchestrationRun {
   results: WorkerResult[];
   reviews: ReviewDecision[];
   history: RunHistoryEntry[];
+  startedAt?: string;
+  completedAt?: string;
 }
 
 export function createTaskId(prefix: string, index: number): string {

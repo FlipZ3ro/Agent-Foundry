@@ -346,6 +346,32 @@ npm install
 npm run demo
 ```
 
+### Run tests
+
+```bash
+npm test
+```
+
+### Start the HTTP API
+
+```bash
+npm run api
+```
+
+Available endpoints:
+- `POST /runs`
+- `GET /runs`
+- `GET /runs/:id`
+- `POST /runs/:id/retry`
+
+Example:
+
+```bash
+curl -X POST http://localhost:3210/runs \
+  -H 'Content-Type: application/json' \
+  -d '{"idea":"Build a crypto + macro SaaS factory MVP"}'
+```
+
 ### Build core packages
 
 ```bash
