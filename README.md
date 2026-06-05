@@ -2,64 +2,120 @@
 
 > Repository: `FlipZ3ro/Agent-Foundry`
 
-Agent Foundry is a monorepo starter for building AI-operated SaaS systems with a simple execution model:
+**Build AI-operated products with a clean multi-agent architecture.**
+
+Agent Foundry is a TypeScript monorepo starter for building agentic SaaS systems around one simple idea:
 
 **planner -> router -> worker swarm -> reviewer**
 
-The goal is to separate **reasoning-heavy orchestration** from **execution-heavy production work** so the system can scale cleanly, stay auditable, and support multiple agent lanes over time.
+Instead of sending every task to one expensive general-purpose model, Agent Foundry separates:
+
+- **reasoning**
+- **routing**
+- **execution**
+- **review**
+- **run history**
+
+That makes the system easier to scale, inspect, debug, and evolve.
 
 ---
 
-## Why this name
+## TL;DR
 
-I think **Agent Foundry** is the best simple name here because it is:
+Agent Foundry is for teams who want to build:
 
-- **short**
-- **easy to remember**
-- sounds like a place where products get built
-- broad enough for SaaS, agents, automations, and internal tooling
-- cleaner than a long descriptive repo name
+- AI SaaS factories
+- internal agent ops platforms
+- research and content pipelines
+- multi-lane execution systems
+- autonomous product builders
+- reviewable agent workflows with explicit contracts
 
-Other good options if you want alternatives:
+Current state:
 
-- **Agent Foundry** ← best balance
-- **SaaS Foundry**
-- **BuildSwarm**
-- **TaskForge**
-- **LaunchOS**
+- runnable demo: **yes**
+- typed schemas: **yes**
+- routing layer: **yes**
+- run history shape: **yes**
+- HTTP API: **not yet**
+- persistent storage: **not yet**
+- real dashboard UI: **not yet**
+
+---
+
+## Why Agent Foundry
+
+The name is short, clean, and broad.
+
+It feels like a place where products get built.
+
+That fits the repo better than a long descriptive name, because this project is not just a SaaS scaffold — it is intended to become an **agent operating system for product creation**.
+
+Other names that also work:
+
+- `SaaS Foundry`
+- `BuildSwarm`
+- `TaskForge`
+- `LaunchOS`
+
+But **Agent Foundry** is the best balance of:
+
+- simple
+- memorable
+- flexible
+- brandable
+
+---
+
+## The problem this repo is solving
+
+Most teams overpay for AI workflows because they route everything through one strong model.
+
+That creates three problems:
+
+1. **cost explosion**
+2. **unclear task boundaries**
+3. **poor observability**
+
+Agent Foundry takes a different approach.
+
+It assumes different layers should do different jobs:
+
+- **Planner** handles decomposition, strategy, and quality thresholds
+- **Router** decides whether a task is reasoning-heavy, execution-heavy, or hybrid
+- **Worker swarm** handles clear, parallelizable output generation
+- **Reviewer** checks results before acceptance
+- **Run history** records what happened across the lifecycle
+
+This turns a vague “AI app builder” into a structured system.
+
+---
 
 ## Core idea
 
-Most teams waste money by sending every task to the most expensive model.
+The architecture is intentionally simple:
 
-This repo is designed around a different pattern:
+```text
+Idea
+  -> Planner
+  -> ProjectBlueprint
+  -> Router
+  -> RoutingDecision[]
+  -> WorkerJob[]
+  -> WorkerResult[]
+  -> ReviewDecision[]
+  -> OrchestrationRun
+```
 
-- **Planner** handles strategy, decomposition, and quality thresholds
-- **Router** decides whether a task needs reasoning, execution, or both
-- **Worker swarm** handles clear, parallelizable output generation
-- **Reviewer** checks outputs before they are accepted
-- **Run history** records what happened at each stage
+The point is not complexity.
 
-This creates a reusable operating system for agentic product building.
+The point is to make these things explicit:
 
----
-
-## Current architecture
-
-The current implementation is a minimal runnable prototype of this flow:
-
-1. **Planner** creates a `ProjectBlueprint`
-2. **Router** classifies each task into an execution mode
-3. **Orchestrator** creates routed `WorkerJob[]`
-4. **Worker layer** produces `WorkerResult[]`
-5. **Reviewer** returns `ReviewDecision[]`
-6. **Run history** captures the lifecycle of the run
-
-Execution modes currently supported in schema:
-
-- `reasoning`
-- `execution`
-- `hybrid`
+- what was planned
+- how it was routed
+- what got executed
+- what passed review
+- what happened during the run
 
 ---
 
@@ -69,7 +125,7 @@ Execution modes currently supported in schema:
 Located in:
 - `packages/schemas`
 
-Includes:
+Current contracts include:
 - `ProjectBlueprint`
 - `TaskSpec`
 - `AcceptanceCriterion`
@@ -88,30 +144,62 @@ Located in:
 
 Current responsibilities:
 
-- **Orchestrator**
-  - creates the project blueprint
-  - applies routing decisions
-  - creates jobs
-  - collects results
-  - assembles the full run object
+#### `services/orchestrator`
+- creates the project blueprint
+- applies routing decisions
+- creates jobs
+- collects results
+- assembles the final run object
+- exposes the demo entrypoint
 
-- **Worker**
-  - simulates task execution
-  - returns produced files and summaries
+#### `services/worker`
+- simulates task execution
+- returns summaries and produced files
 
-- **Reviewer**
-  - applies a simple quality gate
-  - approves tasks that declare outputs
+#### `services/reviewer`
+- applies a simple quality gate
+- approves or rejects based on declared outputs
 
 ### App placeholders
 Located in:
 - `apps/web`
 - `apps/dashboard`
 
-These are placeholders for:
-- marketing site
+Intended future roles:
+- public product or marketing shell
 - operator dashboard
-- run viewer / control panel
+- run viewer / control plane
+
+---
+
+## Current architecture
+
+The repo currently implements a minimal prototype of this flow:
+
+1. **Planner** creates a `ProjectBlueprint`
+2. **Router** classifies tasks into execution modes
+3. **Orchestrator** creates routed `WorkerJob[]`
+4. **Worker layer** produces `WorkerResult[]`
+5. **Reviewer** returns `ReviewDecision[]`
+6. **Run history** captures the lifecycle of the run
+
+Execution modes currently modeled in schema:
+
+- `reasoning`
+- `execution`
+- `hybrid`
+
+---
+
+## Example routing logic
+
+The demo uses simple heuristics right now:
+
+- **frontend tasks** with clear outputs -> `execution`
+- **backend contract tasks** -> `hybrid`
+- **coordination-heavy tasks** with dependencies -> `reasoning`
+
+This is intentionally lightweight, but it proves the shape of the system.
 
 ---
 
@@ -145,7 +233,7 @@ Agent-Foundry/
 ## Repo map
 
 ### `packages/schemas`
-Source of truth for contracts shared across planner, router, workers, and reviewers.
+Source of truth for contracts shared across planner, router, worker lanes, and reviewers.
 
 ### `services/orchestrator`
 Main coordination layer.
@@ -155,7 +243,7 @@ Contains:
 - routing logic
 - job creation
 - run assembly
-- demo entrypoint
+- demo flow
 
 ### `services/worker`
 Worker abstraction that turns a routed task into an execution result.
@@ -168,44 +256,17 @@ Future operator UI for:
 - viewing runs
 - retrying failed tasks
 - inspecting routing decisions
-- tracking quality and cost
+- tracking quality
+- tracking cost
 
 ### `apps/web`
-Future public-facing site or product shell.
+Future public-facing shell.
 
 ### `docs/architecture`
 Architecture notes and repo map.
 
 ### `docs/examples`
-Small examples of flow and task behavior.
-
----
-
-## Data flow
-
-```text
-Idea
-  -> Planner
-  -> ProjectBlueprint
-  -> Router
-  -> RoutingDecision[]
-  -> WorkerJob[]
-  -> WorkerResult[]
-  -> ReviewDecision[]
-  -> OrchestrationRun
-```
-
----
-
-## Example routing logic
-
-The demo currently applies simple heuristics:
-
-- **frontend tasks** with clear outputs -> `execution`
-- **backend contract tasks** -> `hybrid`
-- **coordination-heavy tasks** with dependencies -> `reasoning`
-
-This is intentionally minimal, but it establishes the right shape for future model routing.
+Examples of task and run behavior.
 
 ---
 
@@ -253,7 +314,9 @@ The demo returns a structured object like this:
 }
 ```
 
-The important part is not the placeholder output itself, but the shape:
+The important part is not the placeholder values.
+
+The important part is that the system shape is explicit:
 
 - planning is explicit
 - routing is explicit
@@ -265,14 +328,27 @@ The important part is not the placeholder output itself, but the shape:
 
 ## What this repo is good for
 
-This repo is a good base for building:
+This repo is a strong base for building:
 
 - AI SaaS factories
 - internal agent ops platforms
 - multi-lane workflow systems
-- autonomous content/research pipelines
+- autonomous content pipelines
+- research and synthesis systems
 - code generation and review pipelines
-- batch execution systems with human approval checkpoints
+- batch execution systems with approval checkpoints
+
+---
+
+## Design principles
+
+This repo is being shaped around a few simple ideas:
+
+- **Reasoning is expensive** -> use it where judgment matters
+- **Execution should scale** -> route clear tasks to workers
+- **Review should be explicit** -> never silently accept outputs
+- **History matters** -> every run should be inspectable
+- **Contracts first** -> define schemas before infra
 
 ---
 
@@ -297,10 +373,10 @@ Not implemented yet:
 
 ## Best next steps
 
-If you want to evolve this into a real platform, the best next changes are:
+If you want to evolve this into a real platform, the most valuable next changes are:
 
 ### 1. Persist run history
-Save each `OrchestrationRun` into a `runs/` directory or database.
+Save each `OrchestrationRun` into a `runs/` directory or a database.
 
 ### 2. Add HTTP API
 Expose endpoints like:
@@ -312,7 +388,7 @@ Expose endpoints like:
 Replace demo heuristics with task classification rules based on:
 - ambiguity
 - dependency count
-- output format clarity
+- output clarity
 - reviewability
 - estimated cost
 
@@ -332,30 +408,6 @@ Show:
 - failures
 - review notes
 - estimated cost savings
-
----
-
-## Design principles
-
-This repo is being shaped around a few simple ideas:
-
-- **Reasoning is expensive** -> use it where judgment matters
-- **Execution should scale** -> route clear tasks to workers
-- **Review should be explicit** -> never silently accept outputs
-- **History matters** -> every run should be inspectable
-- **Contracts first** -> schemas before infra
-
----
-
-## Suggested future rename
-
-Current repo name:
-- `Agent-Foundry`
-
-Public-facing name:
-- **Agent Foundry**
-
-This keeps the branding simple while still matching the architecture.
 
 ---
 
