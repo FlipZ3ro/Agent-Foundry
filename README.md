@@ -59,7 +59,7 @@ Each layer falls back to a deterministic stub when no API key is set, so tests a
 | Typed SDK client | done |
 | Cost + token tracking per run | done |
 | Operator dashboard (Vite + React) | done |
-| MCP server (stdio) exposing runs as tools | done |
+| MCP server (stdio + HTTP/Streamable) exposing runs as tools | done |
 | Model-aware router (tier-based model selection) | done |
 | Rubric scoring per acceptance criterion | done |
 | Async POST + SSE streaming to dashboard | done |
@@ -180,19 +180,31 @@ All tests use mocked fetch or stub fallback — no live LLM calls in CI.
 
 ### 7. Expose runs to other agents via MCP
 
-Agent Foundry ships an MCP server (`services/mcp`) that lets other LLM agents call the run pipeline as tools.
+Agent Foundry ships an MCP server (`services/mcp`) that lets other LLM agents call the run pipeline as tools. Two transports:
+
+**stdio** (local — for Claude Code on the same machine):
 
 ```bash
 npm run mcp
 ```
 
-Wire it into Claude Code by adding to your `.mcp.json` or via the CLI:
-
 ```bash
 claude mcp add agent-foundry node --env-file=.env --import tsx services/mcp/src/server.ts
 ```
 
-Available tools: `create_run`, `list_runs`, `get_run`, `retry_run`.
+**HTTP / Streamable** (hosted — reachable over the network by any MCP client):
+
+```bash
+npm run mcp:http     # listens on http://localhost:3211/mcp
+```
+
+```bash
+claude mcp add --transport http agent-foundry http://localhost:3211/mcp
+```
+
+The HTTP transport is stateful: each client `initialize` mints an `mcp-session-id`, subsequent calls reuse it, and `GET /mcp` opens the SSE notification stream. `GET /health` reports active session count.
+
+Available tools (both transports): `create_run`, `list_runs`, `get_run`, `retry_run`.
 
 ---
 
@@ -215,7 +227,7 @@ Agent-Foundry/
 │   ├── worker/           # WorkerExecutor (LLM-backed)
 │   ├── reviewer/         # Reviewer (LLM-backed)
 │   ├── http/             # Express API + MemoryRunStore + FileRunStore
-│   └── mcp/              # stdio MCP server exposing runs as tools
+│   └── mcp/              # MCP server (stdio + HTTP) exposing runs as tools
 ├── tests/                # 8 suites — http-api, file-store, metrics,
 │                         #            sdk, skill-registry, llm-client, …
 ├── infra/                # docker + github reference stubs
@@ -358,7 +370,7 @@ Runs are persisted to the mounted `/data/runs` volume.
 ### Phase 4 — Productization
 - [ ] auth + team workspaces
 - [ ] billing / usage tracking
-- [x] MCP server exposing `/runs` to other agents (stdio; hosted SSE TBD)
+- [x] MCP server exposing `/runs` to other agents (stdio + HTTP/Streamable with session management)
 - [x] artifact storage (worker-produced files actually written to disk under ./artifacts/<runId>/<taskId>/, downloadable via /runs/:id/artifacts/:taskId/:path)
 
 ---
