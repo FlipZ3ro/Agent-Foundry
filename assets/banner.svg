@@ -1,59 +1,88 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" width="1200" height="320">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" width="1280" height="420">
   <defs>
+    <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1020"/>
+      <stop offset="55%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#07131a"/>
+    </linearGradient>
+    <radialGradient id="glowL" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(320 140) rotate(20) scale(420 220)">
+      <stop offset="0%" stop-color="#00F584" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#00F584" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowR" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(980 120) rotate(-20) scale(340 220)">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#00F584"/>
       <stop offset="55%" stop-color="#22d3ee"/>
       <stop offset="100%" stop-color="#a78bfa"/>
     </linearGradient>
-    <linearGradient id="line" x1="0%" y1="0%" x2="100%" y2="0%">
+    <linearGradient id="softLine" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#00F584" stop-opacity="0"/>
-      <stop offset="50%" stop-color="#00F584" stop-opacity="0.4"/>
+      <stop offset="50%" stop-color="#00F584" stop-opacity="0.5"/>
       <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
     </linearGradient>
     <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
       <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#1e293b" stroke-width="0.7"/>
     </pattern>
-    <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
 
-  <rect width="1200" height="320" fill="#0d1117" rx="16"/>
-  <rect width="1200" height="320" fill="url(#grid)" opacity="0.5"/>
+  <rect width="1280" height="420" rx="20" fill="url(#bg1)"/>
+  <rect width="1280" height="420" rx="20" fill="url(#grid)" opacity="0.5"/>
+  <rect width="1280" height="420" rx="20" fill="url(#glowL)"/>
+  <rect width="1280" height="420" rx="20" fill="url(#glowR)"/>
 
-  <g opacity="0.18" stroke="#00F584" stroke-width="1.2" fill="none">
-    <path d="M0 78 H220 L255 112 H360"/>
-    <path d="M1200 242 H980 L945 208 H840"/>
-    <circle cx="220" cy="78" r="4" fill="#00F584"/>
-    <circle cx="360" cy="112" r="4" fill="#00F584"/>
-    <circle cx="980" cy="242" r="4" fill="#00F584"/>
-    <circle cx="840" cy="208" r="4" fill="#00F584"/>
+  <!-- ambient lines -->
+  <g opacity="0.16" stroke="#00F584" stroke-width="1.2" fill="none">
+    <path d="M0 100 H210 L260 150 H420"/>
+    <path d="M1280 290 H1080 L1030 235 H890"/>
+    <circle cx="210" cy="100" r="4" fill="#00F584"/>
+    <circle cx="420" cy="150" r="4" fill="#00F584"/>
+    <circle cx="1080" cy="290" r="4" fill="#00F584"/>
+    <circle cx="890" cy="235" r="4" fill="#00F584"/>
   </g>
 
-  <text x="600" y="128" text-anchor="middle" font-family="monospace" font-size="78" font-weight="800" fill="url(#accent)" filter="url(#glow)">AGENT FOUNDRY</text>
-  <line x1="280" y1="150" x2="920" y2="150" stroke="url(#line)" stroke-width="1.5"/>
-  <text x="600" y="188" text-anchor="middle" font-family="monospace" font-size="18" letter-spacing="4" fill="#9fb3c8">PLANNER → ROUTER → WORKERS → REVIEWER</text>
-  <text x="600" y="216" text-anchor="middle" font-family="monospace" font-size="15" fill="#6f879e">clean multi-agent architecture for AI-operated products</text>
+  <!-- eyebrow -->
+  <rect x="508" y="72" width="264" height="30" rx="15" fill="#0f172a" stroke="#00F584" stroke-opacity="0.35"/>
+  <text x="640" y="92" text-anchor="middle" font-family="monospace" font-size="13" fill="#00F584" letter-spacing="2">MULTI-AGENT PRODUCT OPERATING SYSTEM</text>
 
-  <g font-family="monospace" font-size="13" text-anchor="middle">
-    <rect x="350" y="246" width="104" height="28" rx="14" fill="#00F584" fill-opacity="0.08" stroke="#00F584" stroke-opacity="0.4"/>
-    <text x="402" y="264" fill="#00F584">TYPESCRIPT</text>
+  <!-- title -->
+  <text x="640" y="168" text-anchor="middle" font-family="monospace" font-size="86" font-weight="800" fill="url(#accent)" filter="url(#glow)">AGENT FOUNDRY</text>
+  <line x1="300" y1="188" x2="980" y2="188" stroke="url(#softLine)" stroke-width="1.6"/>
 
-    <rect x="470" y="246" width="90" height="28" rx="14" fill="#22d3ee" fill-opacity="0.08" stroke="#22d3ee" stroke-opacity="0.4"/>
-    <text x="515" y="264" fill="#22d3ee">MONOREPO</text>
+  <!-- subtitle -->
+  <text x="640" y="226" text-anchor="middle" font-family="monospace" font-size="22" fill="#b4c4d6" letter-spacing="3">PLANNER → ROUTER → WORKER SWARM → REVIEWER</text>
+  <text x="640" y="260" text-anchor="middle" font-family="monospace" font-size="17" fill="#8094a8">Launch agentic SaaS systems with explicit routing, execution lanes, and review gates.</text>
 
-    <rect x="576" y="246" width="84" height="28" rx="14" fill="#fbbf24" fill-opacity="0.08" stroke="#fbbf24" stroke-opacity="0.4"/>
-    <text x="618" y="264" fill="#fbbf24">SWARM</text>
+  <!-- bottom cards -->
+  <g font-family="monospace">
+    <rect x="250" y="305" width="220" height="54" rx="14" fill="#0f172a" stroke="#22d3ee" stroke-opacity="0.28"/>
+    <text x="280" y="327" font-size="12" fill="#22d3ee">STACK</text>
+    <text x="280" y="347" font-size="15" fill="#e2e8f0">TypeScript · Monorepo · HTTP</text>
 
-    <rect x="676" y="246" width="100" height="28" rx="14" fill="#a78bfa" fill-opacity="0.08" stroke="#a78bfa" stroke-opacity="0.4"/>
-    <text x="726" y="264" fill="#a78bfa">REVIEWABLE</text>
+    <rect x="530" y="305" width="220" height="54" rx="14" fill="#0f172a" stroke="#00F584" stroke-opacity="0.28"/>
+    <text x="560" y="327" font-size="12" fill="#00F584">FLOW</text>
+    <text x="560" y="347" font-size="15" fill="#e2e8f0">Plan · Route · Execute · Review</text>
 
-    <rect x="792" y="246" width="112" height="28" rx="14" fill="#fb7185" fill-opacity="0.08" stroke="#fb7185" stroke-opacity="0.4"/>
-    <text x="848" y="264" fill="#fb7185">AGENT OPS</text>
+    <rect x="810" y="305" width="220" height="54" rx="14" fill="#0f172a" stroke="#a78bfa" stroke-opacity="0.28"/>
+    <text x="840" y="327" font-size="12" fill="#a78bfa">USE CASE</text>
+    <text x="840" y="347" font-size="15" fill="#e2e8f0">AI SaaS Factory / Agent Ops</text>
   </g>
 
-  <g stroke="#00F584" stroke-width="2" opacity="0.28">
-    <path d="M22 14 V36 M22 14 H44"/>
-    <path d="M1178 14 V36 M1178 14 H1156"/>
-    <path d="M22 306 V284 M22 306 H44"/>
-    <path d="M1178 306 V284 M1178 306 H1156"/>
+  <!-- corners -->
+  <g stroke="#00F584" stroke-width="2" opacity="0.26">
+    <path d="M24 18 V42 M24 18 H48"/>
+    <path d="M1256 18 V42 M1256 18 H1232"/>
+    <path d="M24 402 V378 M24 402 H48"/>
+    <path d="M1256 402 V378 M1256 402 H1232"/>
   </g>
 </svg>
