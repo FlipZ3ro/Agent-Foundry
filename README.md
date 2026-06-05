@@ -9,7 +9,6 @@
 [![Architecture](https://img.shields.io/badge/Architecture-Planner%20%E2%86%92%20Router%20%E2%86%92%20Workers%20%E2%86%92%20Reviewer-111111?style=for-the-badge)](#core-idea)
 [![Status](https://img.shields.io/badge/Status-Prototype-8A2BE2?style=for-the-badge)](#status)
 
-*Repository:* `FlipZ3ro/Agent-Foundry`
 
 </div>
 
