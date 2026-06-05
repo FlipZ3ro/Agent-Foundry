@@ -358,6 +358,9 @@ npm test
 npm run api
 ```
 
+Server:
+- `http://localhost:3210`
+
 Available endpoints:
 - `POST /runs`
 - `GET /runs`
@@ -370,6 +373,12 @@ Example:
 curl -X POST http://localhost:3210/runs \
   -H 'Content-Type: application/json' \
   -d '{"idea":"Build a crypto + macro SaaS factory MVP"}'
+```
+
+### Run tests
+
+```bash
+npm test
 ```
 
 ### Build core packages
