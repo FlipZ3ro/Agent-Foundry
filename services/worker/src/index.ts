@@ -12,6 +12,9 @@ import {
   type LlmClient
 } from "../../../packages/llm/src/index.js";
 import { renderPrompt, skillsForLane } from "../../../packages/prompts/src/index.js";
+import { getLaneConfig } from "./lanes.js";
+
+export { getLaneConfig, listLaneConfigs, type LaneWorkerConfig } from "./lanes.js";
 
 const COST_PER_1K_TOKENS_USD = Number(process.env.MIMO_COST_PER_1K ?? "0.0008");
 const BASE_TOKENS_PER_TASK = 250;
@@ -42,15 +45,16 @@ export class WorkerExecutor {
   }
 
   private async runWithLlm(job: WorkerJob, task: TaskSpec, ctx: RunContext): Promise<WorkerResult> {
+    const lane = getLaneConfig(task.lane);
     const skill = skillsForLane(task.lane)[0];
     const skillPrompt = skill ? renderPrompt(skill, { idea: ctx.idea }) : "";
     const acceptance = task.acceptanceCriteria.map((ac, i) => `${i + 1}. ${ac.description}`).join("\n");
-    const model = job.route.modelId ?? this.model;
+    const model = lane.modelOverride ?? job.route.modelId ?? this.model;
 
     const messages: ChatMessage[] = [
       {
         role: "system",
-        content: `You are a Worker in the ${task.lane} lane. Produce a concise execution summary (2-4 sentences) for the given task. Stay factual and concrete. No prose preamble.`
+        content: `${lane.persona}\n\n${lane.outputDirective}\nNo prose preamble. No markdown code fences.`
       },
       {
         role: "user",
@@ -59,16 +63,14 @@ Task: ${task.title}
 Objective: ${task.objective}
 Acceptance criteria:
 ${acceptance}
-${skillPrompt ? `\nSkill guidance:\n${skillPrompt}` : ""}
-
-Write only the execution summary.`
+${skillPrompt ? `\nSkill guidance:\n${skillPrompt}` : ""}`
       }
     ];
 
     const result = await this.llm!.chat(messages, {
       model,
-      temperature: 0.5,
-      maxTokens: 400
+      temperature: lane.temperature,
+      maxTokens: lane.maxTokens
     });
 
     const metrics = metricsFromUsage(model, result.usage, result.durationMs);

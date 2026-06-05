@@ -63,6 +63,7 @@ Each layer falls back to a deterministic stub when no API key is set, so tests a
 | Model-aware router (tier-based model selection) | done |
 | Rubric scoring per acceptance criterion | done |
 | Async POST + SSE streaming to dashboard | done |
+| Lane-specific worker personas (frontend/backend/data/assets/review) | done |
 | CI workflow (`.github/workflows/test.yml`) | done |
 | ESLint flat config | done |
 | Multi-stage Dockerfile | done |
@@ -343,7 +344,7 @@ Runs are persisted to the mounted `/data/runs` volume.
 - operator dashboard
 
 ### Phase 3 — Specialization
-- [ ] lane-specific workers (research, frontend, backend, content, qa)
+- [x] lane-specific workers (frontend/backend/data/assets/review/planner/router personas with per-lane persona, temperature, and token budget)
 - [x] model-aware router policies (tier-based: execution→fast, hybrid→standard, reasoning→pro)
 - [ ] queue-backed execution for long pipelines
 - [x] richer reviewer rules with rubric scoring (0–5 per criterion, weighted average)
