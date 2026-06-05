@@ -60,6 +60,8 @@ Each layer falls back to a deterministic stub when no API key is set, so tests a
 | Cost + token tracking per run | done |
 | Operator dashboard (Vite + React) | done |
 | MCP server (stdio) exposing runs as tools | done |
+| Model-aware router (tier-based model selection) | done |
+| Rubric scoring per acceptance criterion | done |
 | CI workflow (`.github/workflows/test.yml`) | done |
 | ESLint flat config | done |
 | Multi-stage Dockerfile | done |
@@ -340,9 +342,9 @@ Runs are persisted to the mounted `/data/runs` volume.
 
 ### Phase 3 — Specialization
 - [ ] lane-specific workers (research, frontend, backend, content, qa)
-- [ ] model-aware router policies (haiku for execution, sonnet for reasoning)
+- [x] model-aware router policies (tier-based: execution→fast, hybrid→standard, reasoning→pro)
 - [ ] queue-backed execution for long pipelines
-- [ ] richer reviewer rules with rubric scoring
+- [x] richer reviewer rules with rubric scoring (0–5 per criterion, weighted average)
 - [ ] streaming run updates to the dashboard
 
 ### Phase 4 — Productization

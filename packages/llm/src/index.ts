@@ -1,3 +1,13 @@
+export {
+  MIMO_CATALOG,
+  findModel,
+  pickModelForTier,
+  costForUsage,
+  type ModelTier,
+  type ModelCapability,
+  type ModelEntry
+} from "./models.js";
+
 export interface ChatMessage {
   role: "system" | "user" | "assistant";
   content: string;

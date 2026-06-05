@@ -17,8 +17,10 @@ import { Reviewer } from "../../reviewer/src/index.js";
 import {
   extractJson,
   fromEnv,
+  pickModelForTier,
   type ChatMessage,
-  type LlmClient
+  type LlmClient,
+  type ModelTier
 } from "../../../packages/llm/src/index.js";
 
 interface PlannerLlmTask {
@@ -26,7 +28,7 @@ interface PlannerLlmTask {
   lane: Lane;
   objective: string;
   dependencies?: string[];
-  acceptanceCriteria?: Array<{ description: string }>;
+  acceptanceCriteria?: Array<{ description: string; weight?: number }>;
   outputs?: string[];
 }
 
@@ -43,7 +45,7 @@ Always respond with a single JSON object of shape:
       "lane": "frontend",
       "objective": "what this task must achieve",
       "dependencies": ["task-01"],
-      "acceptanceCriteria": [{"description": "verifiable check"}],
+      "acceptanceCriteria": [{"description": "verifiable check", "weight": 1}],
       "outputs": ["path/to/output"]
     }
   ]
@@ -88,7 +90,11 @@ export class Planner {
         objective: task.objective,
         dependencies: (task.dependencies ?? []).filter((dep) => /^task-\d+$/.test(dep)),
         acceptanceCriteria: (task.acceptanceCriteria ?? [{ description: "Output produced" }]).map(
-          (ac, j) => ({ id: `ac-${index + 1}-${j + 1}`, description: ac.description })
+          (ac, j) => ({
+            id: `ac-${index + 1}-${j + 1}`,
+            description: ac.description,
+            weight: typeof ac.weight === "number" && ac.weight > 0 ? ac.weight : 1
+          })
         ),
         outputs: task.outputs ?? []
       };
@@ -144,6 +150,12 @@ export class Planner {
   }
 }
 
+const MODE_TO_TIER: Record<ExecutionMode, ModelTier> = {
+  execution: "fast",
+  hybrid: "standard",
+  reasoning: "pro"
+};
+
 export class Router {
   decide(task: TaskSpec): RoutingDecision {
     const dependencyHeavy = task.dependencies.length > 0;
@@ -170,7 +182,18 @@ export class Router {
       rubricReady = true;
     }
 
-    return { taskId: task.id, mode, owner, reason, rubricReady };
+    const tier = MODE_TO_TIER[mode];
+    const model = pickModelForTier(tier);
+
+    return {
+      taskId: task.id,
+      mode,
+      owner,
+      reason,
+      rubricReady,
+      modelTier: tier,
+      modelId: model?.id
+    };
   }
 }
 

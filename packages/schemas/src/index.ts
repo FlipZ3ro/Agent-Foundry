@@ -7,6 +7,7 @@ export type RunStatus = "planned" | "running" | "completed" | "failed";
 export interface AcceptanceCriterion {
   id: string;
   description: string;
+  weight?: number;
 }
 
 export interface TaskSpec {
@@ -33,7 +34,11 @@ export interface RoutingDecision {
   owner: "planner" | "worker-swarm" | "planner+worker-swarm";
   reason: string;
   rubricReady: boolean;
+  modelId?: string;
+  modelTier?: ModelTier;
 }
+
+export type ModelTier = "fast" | "standard" | "pro";
 
 export interface WorkerJob {
   id: string;
@@ -67,10 +72,18 @@ export interface WorkerResult {
   metrics?: JobMetrics;
 }
 
+export interface CriterionScore {
+  criterionId: string;
+  score: number;
+  rationale: string;
+}
+
 export interface ReviewDecision {
   taskId: string;
   status: ReviewStatus;
   notes: string[];
+  scores?: CriterionScore[];
+  overallScore?: number;
 }
 
 export interface RunHistoryEntry {

@@ -63,6 +63,7 @@ export function RunDetail({ run, onRetry }: Props) {
               <tr>
                 <th>task</th>
                 <th>mode</th>
+                <th>model</th>
                 <th>owner</th>
                 <th>reason</th>
               </tr>
@@ -73,6 +74,13 @@ export function RunDetail({ run, onRetry }: Props) {
                   <td className="mono">{d.taskId}</td>
                   <td>
                     <span className={`chip mode-${d.mode}`}>{d.mode}</span>
+                  </td>
+                  <td>
+                    {d.modelId ? (
+                      <span className={`chip tier-${d.modelTier ?? "standard"}`}>{d.modelId}</span>
+                    ) : (
+                      <span className="muted">—</span>
+                    )}
                   </td>
                   <td className="mono muted">{d.owner}</td>
                   <td className="muted">{d.reason}</td>
@@ -121,10 +129,28 @@ export function RunDetail({ run, onRetry }: Props) {
         </h3>
         <ul className="review-list">
           {run.reviews.map((rv) => (
-            <li key={rv.taskId} className="review">
-              <span className="mono">{rv.taskId}</span>
-              <span className={`status status-mini status-${rv.status}`}>{rv.status}</span>
-              <span className="muted">{rv.notes.join(" · ")}</span>
+            <li key={rv.taskId} className="review-card">
+              <div className="review-head">
+                <span className="mono">{rv.taskId}</span>
+                <span className={`status status-mini status-${rv.status}`}>{rv.status}</span>
+                {typeof rv.overallScore === "number" ? (
+                  <span className="score-pill" title="weighted rubric score (0–5)">
+                    {rv.overallScore.toFixed(2)} / 5
+                  </span>
+                ) : null}
+              </div>
+              {rv.scores && rv.scores.length > 0 ? (
+                <ul className="score-list">
+                  {rv.scores.map((s) => (
+                    <li key={s.criterionId} className="score-item">
+                      <span className="mono score-id">{s.criterionId}</span>
+                      <ScoreBar value={s.score} />
+                      <span className="muted score-rationale">{s.rationale}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <div className="muted review-notes">{rv.notes.join(" · ")}</div>
             </li>
           ))}
         </ul>
@@ -154,6 +180,18 @@ function Metric({ label, value, accent = false }: { label: string; value: string
     <div className="metric">
       <div className="metric-label">{label}</div>
       <div className={`metric-value ${accent ? "accent" : ""}`}>{value}</div>
+    </div>
+  );
+}
+
+function ScoreBar({ value }: { value: number }) {
+  const clamped = Math.max(0, Math.min(5, value));
+  const pct = (clamped / 5) * 100;
+  const tone = clamped >= 4 ? "good" : clamped >= 2.5 ? "ok" : "bad";
+  return (
+    <div className={`score-bar score-bar-${tone}`} title={`${clamped.toFixed(1)} / 5`}>
+      <div className="score-bar-fill" style={{ width: `${pct}%` }} />
+      <span className="score-bar-value">{clamped.toFixed(1)}</span>
     </div>
   );
 }

@@ -801,6 +801,140 @@ h3 .count-pill {
   padding: 10px 14px;
 }
 
+.review-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.review-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.score-pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(52, 226, 164, 0.3);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.review-notes {
+  font-size: 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
+
+.score-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.score-item {
+  display: grid;
+  grid-template-columns: 70px 140px 1fr;
+  gap: 10px;
+  align-items: center;
+  font-size: 11.5px;
+}
+
+.score-id {
+  font-size: 10.5px;
+}
+
+.score-rationale {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.score-bar {
+  position: relative;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.score-bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  opacity: 0.22;
+}
+
+.score-bar-value {
+  position: relative;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.score-bar-good {
+  border-color: rgba(52, 226, 164, 0.5);
+  color: var(--accent);
+}
+.score-bar-good .score-bar-fill {
+  background: var(--accent);
+}
+
+.score-bar-ok {
+  border-color: rgba(251, 191, 36, 0.5);
+  color: var(--amber);
+}
+.score-bar-ok .score-bar-fill {
+  background: var(--amber);
+}
+
+.score-bar-bad {
+  border-color: rgba(251, 113, 133, 0.5);
+  color: var(--rose);
+}
+.score-bar-bad .score-bar-fill {
+  background: var(--rose);
+}
+
+/* ───── tier chips ───── */
+
+.tier-fast {
+  color: var(--sky);
+  border-color: rgba(56, 189, 248, 0.3);
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.tier-standard {
+  color: var(--amber);
+  border-color: rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.tier-pro {
+  color: var(--violet);
+  border-color: rgba(167, 139, 250, 0.3);
+  background: rgba(167, 139, 250, 0.08);
+}
+
 /* ───── history timeline ───── */
 
 .history {

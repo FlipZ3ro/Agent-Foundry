@@ -5,6 +5,7 @@ import type {
   WorkerResult
 } from "../../../packages/schemas/src/index.js";
 import {
+  costForUsage,
   fromEnv,
   type ChatMessage,
   type ChatUsage,
@@ -44,6 +45,7 @@ export class WorkerExecutor {
     const skill = skillsForLane(task.lane)[0];
     const skillPrompt = skill ? renderPrompt(skill, { idea: ctx.idea }) : "";
     const acceptance = task.acceptanceCriteria.map((ac, i) => `${i + 1}. ${ac.description}`).join("\n");
+    const model = job.route.modelId ?? this.model;
 
     const messages: ChatMessage[] = [
       {
@@ -64,12 +66,12 @@ Write only the execution summary.`
     ];
 
     const result = await this.llm!.chat(messages, {
-      model: this.model,
+      model,
       temperature: 0.5,
       maxTokens: 400
     });
 
-    const metrics = metricsFromUsage(result.usage, result.durationMs);
+    const metrics = metricsFromUsage(model, result.usage, result.durationMs);
     return {
       jobId: job.id,
       taskId: task.id,
@@ -104,7 +106,11 @@ function estimateMetrics(task: TaskSpec): JobMetrics {
   return { tokensUsed, costUsd, durationMs };
 }
 
-function metricsFromUsage(usage: ChatUsage, durationMs: number): JobMetrics {
-  const costUsd = Number(((usage.totalTokens / 1000) * COST_PER_1K_TOKENS_USD).toFixed(6));
+function metricsFromUsage(modelId: string, usage: ChatUsage, durationMs: number): JobMetrics {
+  const fromCatalog = costForUsage(modelId, usage.totalTokens);
+  const costUsd =
+    fromCatalog > 0
+      ? fromCatalog
+      : Number(((usage.totalTokens / 1000) * COST_PER_1K_TOKENS_USD).toFixed(6));
   return { tokensUsed: usage.totalTokens, costUsd, durationMs };
 }
