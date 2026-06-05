@@ -9,7 +9,7 @@ import { isSafePath } from "../services/worker/src/index.js";
 let dir: string;
 
 before(() => {
-  dir = mkdtempSync(join(tmpdir(), "agent-foundry-artifacts-"));
+  dir = mkdtempSync(join(tmpdir(), "swarmforge-artifacts-"));
 });
 
 after(() => {

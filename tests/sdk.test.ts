@@ -2,16 +2,16 @@ import { after, before, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
 import { createApp } from "../services/http/src/app.js";
-import { AgentFoundryClient, AgentFoundryError } from "../packages/sdk/src/index.js";
+import { SwarmforgeClient, SwarmforgeError } from "../packages/sdk/src/index.js";
 
 let server: ReturnType<ReturnType<typeof createApp>["listen"]>;
-let client: AgentFoundryClient;
+let client: SwarmforgeClient;
 
 before(() => {
   const app = createApp();
   server = app.listen(0);
   const { port } = server.address() as AddressInfo;
-  client = new AgentFoundryClient({ baseUrl: `http://127.0.0.1:${port}` });
+  client = new SwarmforgeClient({ baseUrl: `http://127.0.0.1:${port}` });
 });
 
 after(async () => {
@@ -20,7 +20,7 @@ after(async () => {
   );
 });
 
-describe("AgentFoundryClient", () => {
+describe("SwarmforgeClient", () => {
   it("creates and retrieves a run", async () => {
     const created = await client.createRun("SDK round trip");
     assert.ok(created.id);
@@ -44,18 +44,18 @@ describe("AgentFoundryClient", () => {
     assert.notEqual(retried.id, parent.id);
   });
 
-  it("throws AgentFoundryError on 404", async () => {
+  it("throws SwarmforgeError on 404", async () => {
     await assert.rejects(() => client.getRun("run-not-here"), (err: Error) => {
-      assert.ok(err instanceof AgentFoundryError);
-      assert.equal((err as AgentFoundryError).status, 404);
+      assert.ok(err instanceof SwarmforgeError);
+      assert.equal((err as SwarmforgeError).status, 404);
       return true;
     });
   });
 
-  it("throws AgentFoundryError on validation", async () => {
+  it("throws SwarmforgeError on validation", async () => {
     await assert.rejects(() => client.createRun(""), (err: Error) => {
-      assert.ok(err instanceof AgentFoundryError);
-      assert.equal((err as AgentFoundryError).status, 400);
+      assert.ok(err instanceof SwarmforgeError);
+      assert.equal((err as SwarmforgeError).status, 400);
       return true;
     });
   });

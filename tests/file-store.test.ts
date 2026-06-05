@@ -8,7 +8,7 @@ import { FileRunStore } from "../services/http/src/store.js";
 let dir: string;
 
 before(() => {
-  dir = mkdtempSync(join(tmpdir(), "agent-foundry-runs-"));
+  dir = mkdtempSync(join(tmpdir(), "swarmforge-runs-"));
 });
 
 after(() => {

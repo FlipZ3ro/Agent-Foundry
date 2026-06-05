@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-factory/orchestrator",
+  "name": "@swarmforge/orchestrator",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
@@ -8,8 +8,8 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@agentic-factory/reviewer": "0.1.0",
-    "@agentic-factory/schemas": "0.1.0",
-    "@agentic-factory/worker": "0.1.0"
+    "@swarmforge/reviewer": "0.1.0",
+    "@swarmforge/schemas": "0.1.0",
+    "@swarmforge/worker": "0.1.0"
   }
 }

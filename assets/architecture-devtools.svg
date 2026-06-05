@@ -25,7 +25,7 @@
   <rect x="1" y="1" width="1278" height="638" rx="19" fill="none" stroke="#3d3a39"/>
 
   <!-- title -->
-  <text class="label" font-size="22" font-weight="600" x="80" y="54" letter-spacing="0.4">agent-foundry architecture</text>
+  <text class="label" font-size="22" font-weight="600" x="80" y="54" letter-spacing="0.4">swarmforge architecture</text>
   <text class="sub" font-size="14" x="80" y="80">terminal-first planner → router → worker → reviewer pipeline</text>
 
   <!-- input entry -->

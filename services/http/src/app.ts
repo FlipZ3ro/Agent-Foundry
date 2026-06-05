@@ -145,7 +145,7 @@ function main() {
   const app = createApp(store);
 
   app.listen(port, () => {
-    console.log(`Agent Foundry HTTP API listening on http://localhost:${port}`);
+    console.log(`Swarmforge HTTP API listening on http://localhost:${port}`);
   });
 }
 

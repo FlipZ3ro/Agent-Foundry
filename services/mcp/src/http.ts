@@ -74,7 +74,7 @@ function main() {
   const store = process.env.MCP_RUNS_DIR ? new FileRunStore(process.env.MCP_RUNS_DIR) : new FileRunStore();
   const app = createMcpHttpApp(store);
   app.listen(port, () => {
-    process.stderr.write(`agent-foundry mcp http server on http://localhost:${port}${MCP_PATH}\n`);
+    process.stderr.write(`swarmforge mcp http server on http://localhost:${port}${MCP_PATH}\n`);
   });
 }
 

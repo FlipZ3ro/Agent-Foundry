@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-factory/prompts",
+  "name": "@swarmforge/prompts",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",

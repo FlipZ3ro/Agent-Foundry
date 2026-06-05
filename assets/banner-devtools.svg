@@ -22,12 +22,12 @@
   <circle cx="152" cy="98" r="5" fill="#fb565b"/>
   <circle cx="170" cy="98" r="5" fill="#ffba00"/>
   <circle cx="188" cy="98" r="5" fill="#00d992"/>
-  <text x="220" y="102" font-family="SFMono-Regular, Menlo, monospace" font-size="13" fill="#8b949e">agent-foundry</text>
+  <text x="220" y="102" font-family="SFMono-Regular, Menlo, monospace" font-size="13" fill="#8b949e">swarmforge</text>
 
   <line x1="120" y1="118" x2="1160" y2="118" stroke="#3d3a39"/>
 
   <text x="156" y="152" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#00d992">%</text>
-  <text x="176" y="152" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#f2f2f2">npm create agent-foundry@latest</text>
+  <text x="176" y="152" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#f2f2f2">npm create swarmforge@latest</text>
 
   <text x="156" y="186" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> planning:        planner (strategy + decomposition)</text>
   <text x="156" y="212" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> routing:         router (lane selection + job shape)</text>
@@ -35,7 +35,7 @@
   <text x="156" y="264" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> review:          reviewer (pass / revise / fail)</text>
   <text x="156" y="290" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> history:         run lifecycle + artifacts</text>
 
-  <text x="156" y="334" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#f2f2f2">agent-foundry &gt; <tspan fill="#00d992">ready</tspan></text>
+  <text x="156" y="334" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#f2f2f2">swarmforge &gt; <tspan fill="#00d992">ready</tspan></text>
   <rect x="390" y="324" width="2" height="18" fill="#00d992" opacity="0.9"/>
 
   <text x="640" y="430" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="18" fill="#b8b3b0">Terminal-native multi-agent operating system for product creation.</text>

@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-factory/llm",
+  "name": "@swarmforge/llm",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",

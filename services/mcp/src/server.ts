@@ -6,7 +6,7 @@ import { FileRunStore, MemoryRunStore, type RunStore } from "../../http/src/stor
 
 export function createMcpServer(store: RunStore = new MemoryRunStore()): McpServer {
   const server = new McpServer({
-    name: "agent-foundry",
+    name: "swarmforge",
     version: "0.1.0"
   });
 
@@ -77,7 +77,7 @@ async function main() {
   const server = createMcpServer(store);
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  process.stderr.write("agent-foundry mcp server ready (stdio)\n");
+  process.stderr.write("swarmforge mcp server ready (stdio)\n");
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

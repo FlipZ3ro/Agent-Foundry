@@ -20,7 +20,7 @@ after(async () => {
   await client.close();
 });
 
-describe("agent-foundry MCP server", () => {
+describe("swarmforge MCP server", () => {
   it("lists the four expected tools", async () => {
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name).sort();

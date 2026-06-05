@@ -14,7 +14,7 @@ after(async () => {
   await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())));
 });
 
-describe("Agent Foundry HTTP API", () => {
+describe("Swarmforge HTTP API", () => {
   it("creates a run (sync via ?wait=true)", async () => {
     const response = await fetch(`${baseUrl}/runs?wait=true`, {
       method: "POST",

@@ -1,5 +1,5 @@
 {
-  "name": "agent-foundry",
+  "name": "swarmforge",
   "private": true,
   "type": "module",
   "version": "0.2.0",
@@ -16,8 +16,8 @@
     "api": "node --env-file=.env --import tsx services/http/src/app.ts",
     "mcp": "node --env-file=.env --import tsx services/mcp/src/server.ts",
     "mcp:http": "node --env-file=.env --import tsx services/mcp/src/http.ts",
-    "dashboard": "npm --workspace @agentic-factory/dashboard run dev",
-    "dashboard:build": "npm --workspace @agentic-factory/dashboard run build",
+    "dashboard": "npm --workspace @swarmforge/dashboard run dev",
+    "dashboard:build": "npm --workspace @swarmforge/dashboard run build",
     "demo": "npm run build:core && node --env-file=.env dist/services/orchestrator/src/demo.js"
   },
   "devDependencies": {

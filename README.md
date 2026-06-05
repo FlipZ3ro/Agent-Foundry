@@ -1,7 +1,7 @@
-# Agent Foundry
+# Swarmforge
 
 <p align="center">
-  <img src="./assets/banner-devtools.svg" alt="Agent Foundry banner" width="100%" />
+  <img src="./assets/banner-devtools.svg" alt="Swarmforge banner" width="100%" />
 </p>
 
 <div align="center">
@@ -19,7 +19,7 @@
 
 ## Overview
 
-Agent Foundry is a TypeScript monorepo that turns an idea into a reviewed multi-task build run, driven by an LLM.
+Swarmforge is a TypeScript monorepo that turns an idea into a reviewed multi-task build run, driven by an LLM.
 
 **planner → router → worker swarm → reviewer**
 
@@ -80,7 +80,7 @@ Each layer falls back to a deterministic stub when no API key is set, so tests a
 ## Architecture
 
 <p align="center">
-  <img src="./assets/architecture-devtools.svg" alt="Agent Foundry architecture" width="720" />
+  <img src="./assets/architecture-devtools.svg" alt="Swarmforge architecture" width="720" />
 </p>
 
 > Style: VoltAgent-style devtools aesthetic — near-black canvas `#08080b`, glass surfaces, emerald `#34e2a4` accent with subtle violet/amber/sky semantics.
@@ -180,7 +180,7 @@ All tests use mocked fetch or stub fallback — no live LLM calls in CI.
 
 ### 7. Expose runs to other agents via MCP
 
-Agent Foundry ships an MCP server (`services/mcp`) that lets other LLM agents call the run pipeline as tools. Two transports:
+Swarmforge ships an MCP server (`services/mcp`) that lets other LLM agents call the run pipeline as tools. Two transports:
 
 **stdio** (local — for Claude Code on the same machine):
 
@@ -189,7 +189,7 @@ npm run mcp
 ```
 
 ```bash
-claude mcp add agent-foundry node --env-file=.env --import tsx services/mcp/src/server.ts
+claude mcp add swarmforge node --env-file=.env --import tsx services/mcp/src/server.ts
 ```
 
 **HTTP / Streamable** (hosted — reachable over the network by any MCP client):
@@ -199,7 +199,7 @@ npm run mcp:http     # listens on http://localhost:3211/mcp
 ```
 
 ```bash
-claude mcp add --transport http agent-foundry http://localhost:3211/mcp
+claude mcp add --transport http swarmforge http://localhost:3211/mcp
 ```
 
 The HTTP transport is stateful: each client `initialize` mints an `mcp-session-id`, subsequent calls reuse it, and `GET /mcp` opens the SSE notification stream. `GET /health` reports active session count.
@@ -211,7 +211,7 @@ Available tools (both transports): `create_run`, `list_runs`, `get_run`, `retry_
 ## Repo structure
 
 ```text
-Agent-Foundry/
+Swarmforge/
 ├── apps/
 │   ├── dashboard/        # Vite + React + TS operator UI
 │   └── web/              # public-facing shell (stub)
@@ -321,12 +321,12 @@ The mode is selected automatically by presence of `MIMO_API_KEY`.
 ## Docker
 
 ```bash
-docker build -t agent-foundry .
+docker build -t swarmforge .
 docker run -p 3210:3210 \
   -e MIMO_BASE_URL="$MIMO_BASE_URL" \
   -e MIMO_API_KEY="$MIMO_API_KEY" \
   -v "$(pwd)/runs:/data/runs" \
-  agent-foundry
+  swarmforge
 ```
 
 Runs are persisted to the mounted `/data/runs` volume.

@@ -28,7 +28,7 @@ after(async () => {
   await new Promise<void>((resolve, reject) => server.close((err) => (err ? reject(err) : resolve())));
 });
 
-describe("agent-foundry MCP over HTTP", () => {
+describe("swarmforge MCP over HTTP", () => {
   it("lists tools over the network", async () => {
     const { tools } = await client.listTools();
     const names = tools.map((t) => t.name).sort();

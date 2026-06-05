@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-factory/worker",
+  "name": "@swarmforge/worker",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
@@ -8,6 +8,6 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@agentic-factory/schemas": "0.1.0"
+    "@swarmforge/schemas": "0.1.0"
   }
 }

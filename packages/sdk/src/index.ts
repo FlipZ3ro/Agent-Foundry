@@ -5,27 +5,27 @@ export type RunSummary = Pick<
   "id" | "blueprintId" | "idea" | "status" | "startedAt" | "completedAt" | "retryOf"
 >;
 
-export interface AgentFoundryClientOptions {
+export interface SwarmforgeClientOptions {
   baseUrl?: string;
   fetch?: typeof fetch;
 }
 
-export class AgentFoundryError extends Error {
+export class SwarmforgeError extends Error {
   constructor(message: string, readonly status: number, readonly body?: unknown) {
     super(message);
-    this.name = "AgentFoundryError";
+    this.name = "SwarmforgeError";
   }
 }
 
-export class AgentFoundryClient {
+export class SwarmforgeClient {
   private readonly baseUrl: string;
   private readonly fetchImpl: typeof fetch;
 
-  constructor(options: AgentFoundryClientOptions = {}) {
+  constructor(options: SwarmforgeClientOptions = {}) {
     this.baseUrl = (options.baseUrl ?? "http://localhost:3210").replace(/\/$/, "");
     const impl = options.fetch ?? globalThis.fetch;
     if (!impl) {
-      throw new Error("AgentFoundryClient requires a fetch implementation");
+      throw new Error("SwarmforgeClient requires a fetch implementation");
     }
     this.fetchImpl = impl.bind(globalThis);
   }
@@ -74,7 +74,7 @@ export class AgentFoundryClient {
         parsed && typeof parsed === "object" && parsed !== null && "error" in parsed
           ? String((parsed as { error: unknown }).error)
           : `Request to ${path} failed with status ${response.status}`;
-      throw new AgentFoundryError(message, response.status, parsed);
+      throw new SwarmforgeError(message, response.status, parsed);
     }
 
     return parsed as T;

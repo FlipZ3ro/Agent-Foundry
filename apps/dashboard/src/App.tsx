@@ -175,7 +175,7 @@ export function App() {
           <div className="brand-block">
             <div className="brand-kicker">MIMO SWARM · PLANNER → ROUTER → WORKER → REVIEWER</div>
             <div className="brand-title">
-              AGENT FOUNDRY <span className="brand-x">×</span> MIMO ORCHESTRATION
+              SWARMFORGE <span className="brand-x">×</span> MIMO ORCHESTRATION
             </div>
           </div>
         </div>
