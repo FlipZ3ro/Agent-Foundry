@@ -1,7 +1,7 @@
 # Agent Foundry
 
 <p align="center">
-  <img src="./assets/banner.svg" alt="Agent Foundry banner" width="100%" />
+  <img src="./assets/banner-devtools.svg" alt="Agent Foundry banner" width="100%" />
 </p>
 
 <div align="center">
@@ -110,7 +110,7 @@ This turns a vague “AI app builder” into a structured system.
 ## Core idea
 
 <p align="center">
-  <img src="./assets/architecture.svg" alt="Agent Foundry architecture" width="720" />
+  <img src="./assets/architecture-devtools.svg" alt="Agent Foundry architecture" width="720" />
 </p>
 
 > Architecture style uses a VoltAgent-style hardcore devtools look:
