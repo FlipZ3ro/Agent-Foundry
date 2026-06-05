@@ -50,14 +50,25 @@ export function App() {
       streamRef.current = source;
       setActiveStream(runId);
 
-      source.addEventListener("planned", (ev: MessageEvent<string>) => {
-        const data = JSON.parse(ev.data) as { tasks: OrchestrationRun["jobs"]; summary: string };
+      source.addEventListener("queued", (ev: MessageEvent<string>) => {
+        const data = JSON.parse(ev.data) as { position: number; pending: number };
+        setSelected((prev) => (prev && prev.id === runId ? { ...prev, status: "queued" } : prev));
+        setRuns((prev) => prev.map((r) => (r.id === runId ? { ...r, status: "queued" } : r)));
+        void data;
+      });
+
+      source.addEventListener("started", (ev: MessageEvent<string>) => {
+        const data = JSON.parse(ev.data) as { at: string };
         setSelected((prev) =>
           prev && prev.id === runId
-            ? { ...prev, status: "running" }
-            : prev ?? null
+            ? { ...prev, status: "running", startedAt: data.at }
+            : prev
         );
         setRuns((prev) => prev.map((r) => (r.id === runId ? { ...r, status: "running" } : r)));
+      });
+
+      source.addEventListener("planned", (ev: MessageEvent<string>) => {
+        const data = JSON.parse(ev.data) as { tasks: OrchestrationRun["jobs"]; summary: string };
         void refresh();
         void data;
       });
@@ -115,7 +126,7 @@ export function App() {
       try {
         const run = await client.getRun(id);
         setSelected(run);
-        if (run.status === "running") subscribe(id);
+        if (run.status === "running" || run.status === "queued") subscribe(id);
         else closeStream();
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));

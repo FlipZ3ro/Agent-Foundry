@@ -32,7 +32,7 @@ describe("Agent Foundry HTTP API", () => {
     assert.ok(run.completedAt);
   });
 
-  it("creates a run async returns 202 + running status", async () => {
+  it("creates a run async returns 202 + queued status", async () => {
     const response = await fetch(`${baseUrl}/runs`, {
       method: "POST",
       headers: JSON_HEADERS,
@@ -41,7 +41,17 @@ describe("Agent Foundry HTTP API", () => {
     assert.equal(response.status, 202);
     const run = await response.json();
     assert.ok(run.id);
-    assert.equal(run.status, "running");
+    assert.ok(["queued", "running"].includes(run.status), `expected queued|running, got ${run.status}`);
+  });
+
+  it("exposes queue stats", async () => {
+    const response = await fetch(`${baseUrl}/queue`);
+    assert.equal(response.status, 200);
+    const stats = await response.json();
+    assert.equal(typeof stats.concurrency, "number");
+    assert.equal(typeof stats.size, "number");
+    assert.equal(typeof stats.pending, "number");
+    assert.equal(typeof stats.paused, "boolean");
   });
 
   it("rejects missing ideas", async () => {

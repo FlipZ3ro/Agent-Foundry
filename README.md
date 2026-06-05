@@ -64,6 +64,7 @@ Each layer falls back to a deterministic stub when no API key is set, so tests a
 | Rubric scoring per acceptance criterion | done |
 | Async POST + SSE streaming to dashboard | done |
 | Lane-specific worker personas (frontend/backend/data/assets/review) | done |
+| In-process queue (p-queue) with concurrency cap + queue stats endpoint | done |
 | CI workflow (`.github/workflows/test.yml`) | done |
 | ESLint flat config | done |
 | Multi-stage Dockerfile | done |
@@ -146,7 +147,8 @@ Endpoints:
 - `POST /runs` — create a run from an idea. Returns 202 + `{ id, status: "running" }` immediately. Add `?wait=true` to block until completion (returns 201 + full run; used by SDK and MCP server).
 - `GET /runs` — list summaries
 - `GET /runs/:id` — fetch full run (current state if in-flight)
-- `GET /runs/:id/stream` — Server-Sent Events: `planned`, `routed`, `task-started`, `task-completed`, `task-reviewed`, `history`, `done`. The dashboard consumes this for live updates.
+- `GET /runs/:id/stream` — Server-Sent Events: `queued`, `started`, `planned`, `routed`, `task-started`, `task-completed`, `task-reviewed`, `history`, `done`. The dashboard consumes this for live updates.
+- `GET /queue` — current `{ concurrency, size (waiting), pending (active), paused }`.
 - `POST /runs/:id/retry` — async retry; `?wait=true` blocks. Replays only the failed tasks (preserves approved ones).
 
 ### 4. Run the dashboard
@@ -346,7 +348,7 @@ Runs are persisted to the mounted `/data/runs` volume.
 ### Phase 3 — Specialization
 - [x] lane-specific workers (frontend/backend/data/assets/review/planner/router personas with per-lane persona, temperature, and token budget)
 - [x] model-aware router policies (tier-based: execution→fast, hybrid→standard, reasoning→pro)
-- [ ] queue-backed execution for long pipelines
+- [x] in-process queue with concurrency cap (`QUEUE_CONCURRENCY` env, default 4). BullMQ/Redis-backed durable queue is a future swap-in.
 - [x] richer reviewer rules with rubric scoring (0–5 per criterion, weighted average)
 - [x] streaming run updates to the dashboard (SSE; planned/routed/task-started/task-completed/task-reviewed/done events)
 

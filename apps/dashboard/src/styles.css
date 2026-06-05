@@ -440,6 +440,11 @@ button.ghost {
   box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
 }
 
+.row-status-dot.queued {
+  background: var(--sky);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
 .row-main {
   display: flex;
   flex-direction: column;
@@ -566,6 +571,12 @@ button.ghost {
   color: var(--amber);
   border-color: rgba(251, 191, 36, 0.35);
   background: rgba(251, 191, 36, 0.1);
+}
+
+.status-queued {
+  color: var(--sky);
+  border-color: rgba(56, 189, 248, 0.35);
+  background: rgba(56, 189, 248, 0.1);
 }
 
 .status-mini {

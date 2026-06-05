@@ -41,6 +41,10 @@ export function createApp(store: RunStore = new MemoryRunStore()) {
     res.json(store.list());
   });
 
+  app.get("/queue", (_req: Request, res: Response) => {
+    res.json(store.queueStats());
+  });
+
   app.get("/runs/:id", (req: Request, res: Response) => {
     const entry = store.get(String(req.params.id));
     if (!entry) {
@@ -89,20 +93,21 @@ export function createApp(store: RunStore = new MemoryRunStore()) {
     }, 15_000);
     heartbeat.unref?.();
 
-    const unsubscribe = store.bus.subscribe(id, (event) => {
+    let unsubscribe: () => void = () => undefined;
+    const close = () => {
+      clearInterval(heartbeat);
+      unsubscribe();
+      if (!res.writableEnded) res.end();
+    };
+    unsubscribe = store.bus.subscribe(id, (event) => {
       res.write(`event: ${event.type}\n`);
       res.write(`data: ${JSON.stringify(event)}\n\n`);
       if (event.type === "done" || event.type === "error") {
-        clearInterval(heartbeat);
-        unsubscribe();
-        res.end();
+        close();
       }
     });
 
-    req.on("close", () => {
-      clearInterval(heartbeat);
-      unsubscribe();
-    });
+    req.on("close", close);
   });
 
   return app;

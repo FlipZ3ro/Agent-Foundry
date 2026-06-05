@@ -2,7 +2,7 @@ export type Lane = "planner" | "router" | "data" | "backend" | "frontend" | "ass
 export type JobStatus = "queued" | "routed" | "in_progress" | "done" | "failed";
 export type ReviewStatus = "approved" | "changes_requested";
 export type ExecutionMode = "reasoning" | "execution" | "hybrid";
-export type RunStatus = "planned" | "running" | "completed" | "failed";
+export type RunStatus = "queued" | "planned" | "running" | "completed" | "failed";
 
 export interface AcceptanceCriterion {
   id: string;

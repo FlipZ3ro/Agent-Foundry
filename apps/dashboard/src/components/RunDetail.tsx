@@ -59,9 +59,15 @@ export function RunDetail({ run, onRetry, live = false }: Props) {
 
       {live && run.routingDecisions.length === 0 ? (
         <div className="card empty live-skeleton">
-          <Icon name="sparkle" className="empty-icon" />
-          <div className="empty-title">planning…</div>
-          <div className="empty-hint">MiMo is decomposing your idea into tasks</div>
+          <Icon name={run.status === "queued" ? "clock" : "sparkle"} className="empty-icon" />
+          <div className="empty-title">
+            {run.status === "queued" ? "waiting in queue…" : "planning…"}
+          </div>
+          <div className="empty-hint">
+            {run.status === "queued"
+              ? "concurrency cap reached, run starts as soon as a slot frees up"
+              : "MiMo is decomposing your idea into tasks"}
+          </div>
         </div>
       ) : null}
 

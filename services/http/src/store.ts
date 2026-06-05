@@ -7,6 +7,7 @@ import {
 } from "../../../packages/schemas/src/index.js";
 import { Orchestrator, type ProgressCallback } from "../../orchestrator/src/index.js";
 import { RunBus, type RunEvent } from "./run-bus.js";
+import { RunQueue, type QueueStats } from "./queue.js";
 
 export type StoredRun = { blueprint: ProjectBlueprint; run: OrchestrationRun };
 export type RunListItem = Pick<
@@ -20,6 +21,15 @@ export interface CreateOptions {
 
 export abstract class RunStore {
   readonly bus = new RunBus();
+  readonly queue: RunQueue;
+
+  constructor(queue?: RunQueue) {
+    this.queue = queue ?? new RunQueue();
+  }
+
+  queueStats(): QueueStats {
+    return this.queue.stats();
+  }
 
   /** Synchronously reserve a run id + placeholder, kick off async pipeline. */
   abstract begin(idea: string, options?: CreateOptions): StoredRun;
@@ -55,7 +65,6 @@ export abstract class RunStore {
   }
 
   protected makePlaceholder(runId: string, idea: string, options?: CreateOptions): StoredRun {
-    const now = new Date().toISOString();
     return {
       blueprint: {
         id: "blueprint-001",
@@ -68,13 +77,12 @@ export abstract class RunStore {
         id: runId,
         blueprintId: "blueprint-001",
         idea,
-        status: "running",
+        status: "queued",
         routingDecisions: [],
         jobs: [],
         results: [],
         reviews: [],
         history: [],
-        startedAt: now,
         retryOf: options?.retryOf
       }
     };
@@ -99,32 +107,7 @@ export class MemoryRunStore extends RunStore {
     const placeholder = this.makePlaceholder(runId, idea, options);
     const slot: MemorySlot = { current: placeholder };
     this.slots.set(runId, slot);
-
-    slot.pending = (async () => {
-      try {
-        const created = await this.orchestrator.run(idea, this.wrapProgress(runId));
-        const completedAt = new Date().toISOString();
-        const finished: StoredRun = {
-          blueprint: created.blueprint,
-          run: {
-            ...created.run,
-            id: runId,
-            startedAt: placeholder.run.startedAt,
-            completedAt,
-            retryOf: options?.retryOf
-          }
-        };
-        slot.current = finished;
-        this.bus.publish(runId, { type: "done", run: finished.run });
-        return finished;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        slot.current = failPlaceholder(slot.current, message);
-        this.bus.publish(runId, { type: "error", message });
-        return slot.current;
-      }
-    })();
-
+    slot.pending = this.scheduleRun(runId, slot, () => this.orchestrator.run(idea, this.wrapProgress(runId)), options);
     return placeholder;
   }
 
@@ -151,33 +134,50 @@ export class MemoryRunStore extends RunStore {
     const placeholder = this.makePlaceholder(runId, parent.run.idea, { retryOf: parent.run.id });
     const slot: MemorySlot = { current: placeholder };
     this.slots.set(runId, slot);
+    slot.pending = this.scheduleRun(
+      runId,
+      slot,
+      () => this.orchestrator.replay(parent, this.wrapProgress(runId)),
+      { retryOf: parent.run.id }
+    );
+    return placeholder;
+  }
 
-    slot.pending = (async () => {
+  private scheduleRun(
+    runId: string,
+    slot: MemorySlot,
+    work: () => Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }>,
+    options?: CreateOptions
+  ): Promise<StoredRun> {
+    const { queued, finished } = this.queue.enqueue(async () => {
+      const startedAt = new Date().toISOString();
+      slot.current = transitionTo(slot.current, "running", startedAt);
+      this.bus.publish(runId, { type: "started", at: startedAt });
       try {
-        const replay = await this.orchestrator.replay(parent, this.wrapProgress(runId));
+        const created = await work();
         const completedAt = new Date().toISOString();
-        const finished: StoredRun = {
-          blueprint: replay.blueprint,
+        const merged: StoredRun = {
+          blueprint: created.blueprint,
           run: {
-            ...replay.run,
+            ...created.run,
             id: runId,
-            startedAt: placeholder.run.startedAt,
+            startedAt,
             completedAt,
-            retryOf: parent.run.id
+            retryOf: options?.retryOf
           }
         };
-        slot.current = finished;
-        this.bus.publish(runId, { type: "done", run: finished.run });
-        return finished;
+        slot.current = merged;
+        this.bus.publish(runId, { type: "done", run: merged.run });
+        return merged;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         slot.current = failPlaceholder(slot.current, message);
         this.bus.publish(runId, { type: "error", message });
         return slot.current;
       }
-    })();
-
-    return placeholder;
+    });
+    this.bus.publish(runId, { type: "queued", position: queued.position, pending: queued.pending });
+    return finished;
   }
 }
 
@@ -202,33 +202,12 @@ export class FileRunStore extends RunStore {
     this.write(placeholder);
     const slot: FileSlot = {};
     this.slots.set(runId, slot);
-
-    slot.pending = (async () => {
-      try {
-        const created = await this.orchestrator.run(idea, this.wrapProgress(runId));
-        const completedAt = new Date().toISOString();
-        const finished: StoredRun = {
-          blueprint: created.blueprint,
-          run: {
-            ...created.run,
-            id: runId,
-            startedAt: placeholder.run.startedAt,
-            completedAt,
-            retryOf: options?.retryOf
-          }
-        };
-        this.write(finished);
-        this.bus.publish(runId, { type: "done", run: finished.run });
-        return finished;
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        const failed = failPlaceholder(placeholder, message);
-        this.write(failed);
-        this.bus.publish(runId, { type: "error", message });
-        return failed;
-      }
-    })();
-
+    slot.pending = this.scheduleRun(
+      runId,
+      placeholder,
+      () => this.orchestrator.run(idea, this.wrapProgress(runId)),
+      options
+    );
     return placeholder;
   }
 
@@ -260,24 +239,42 @@ export class FileRunStore extends RunStore {
     this.write(placeholder);
     const slot: FileSlot = {};
     this.slots.set(runId, slot);
+    slot.pending = this.scheduleRun(
+      runId,
+      placeholder,
+      () => this.orchestrator.replay(parent, this.wrapProgress(runId)),
+      { retryOf: parent.run.id }
+    );
+    return placeholder;
+  }
 
-    slot.pending = (async () => {
+  private scheduleRun(
+    runId: string,
+    placeholder: StoredRun,
+    work: () => Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }>,
+    options?: CreateOptions
+  ): Promise<StoredRun> {
+    const { queued, finished } = this.queue.enqueue(async () => {
+      const startedAt = new Date().toISOString();
+      const running = transitionTo(placeholder, "running", startedAt);
+      this.write(running);
+      this.bus.publish(runId, { type: "started", at: startedAt });
       try {
-        const replay = await this.orchestrator.replay(parent, this.wrapProgress(runId));
+        const created = await work();
         const completedAt = new Date().toISOString();
-        const finished: StoredRun = {
-          blueprint: replay.blueprint,
+        const merged: StoredRun = {
+          blueprint: created.blueprint,
           run: {
-            ...replay.run,
+            ...created.run,
             id: runId,
-            startedAt: placeholder.run.startedAt,
+            startedAt,
             completedAt,
-            retryOf: parent.run.id
+            retryOf: options?.retryOf
           }
         };
-        this.write(finished);
-        this.bus.publish(runId, { type: "done", run: finished.run });
-        return finished;
+        this.write(merged);
+        this.bus.publish(runId, { type: "done", run: merged.run });
+        return merged;
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         const failed = failPlaceholder(placeholder, message);
@@ -285,9 +282,9 @@ export class FileRunStore extends RunStore {
         this.bus.publish(runId, { type: "error", message });
         return failed;
       }
-    })();
-
-    return placeholder;
+    });
+    this.bus.publish(runId, { type: "queued", position: queued.position, pending: queued.pending });
+    return finished;
   }
 
   private pathFor(id: string): string {
@@ -307,6 +304,21 @@ export class FileRunStore extends RunStore {
   private nextIndex(): number {
     return this.allStored().length + 1;
   }
+}
+
+function transitionTo(
+  stored: StoredRun,
+  status: "queued" | "running" | "completed" | "failed",
+  startedAt?: string
+): StoredRun {
+  return {
+    blueprint: stored.blueprint,
+    run: {
+      ...stored.run,
+      status,
+      startedAt: startedAt ?? stored.run.startedAt
+    }
+  };
 }
 
 function failPlaceholder(placeholder: StoredRun, message: string): StoredRun {

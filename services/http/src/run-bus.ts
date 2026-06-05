@@ -9,6 +9,8 @@ import type {
 } from "../../../packages/schemas/src/index.js";
 
 export type RunEvent =
+  | { type: "queued"; position: number; pending: number }
+  | { type: "started"; at: string }
   | { type: "planned"; tasks: TaskSpec[]; summary: string }
   | { type: "routed"; decisions: RoutingDecision[] }
   | { type: "task-started"; taskId: string; jobId: string }
