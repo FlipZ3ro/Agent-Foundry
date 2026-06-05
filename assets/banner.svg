@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360">
+  <defs>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F584"/>
+      <stop offset="50%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="soft" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00F584" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.08"/>
+    </linearGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M 36 0 L 0 0 0 36" fill="none" stroke="#1e293b" stroke-width="0.7"/>
+    </pattern>
+    <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow2"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+
+  <rect width="1200" height="360" fill="#0d1117" rx="16"/>
+  <rect width="1200" height="360" fill="url(#grid)" opacity="0.55"/>
+
+  <g opacity="0.20" stroke="#00F584" stroke-width="1.2" fill="none">
+    <path d="M0 95 H180 L220 135 H330"/>
+    <path d="M1200 255 H1040 L1000 215 H905"/>
+    <circle cx="180" cy="95" r="4" fill="#00F584"/>
+    <circle cx="330" cy="135" r="4" fill="#00F584"/>
+    <circle cx="1040" cy="255" r="4" fill="#00F584"/>
+    <circle cx="905" cy="215" r="4" fill="#00F584"/>
+  </g>
+
+  <!-- left mini architecture -->
+  <g transform="translate(58 92)">
+    <rect x="0" y="0" width="110" height="40" rx="10" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="55" y="24" text-anchor="middle" font-family="monospace" font-size="14" fill="#22d3ee">PLANNER</text>
+
+    <rect x="150" y="0" width="110" height="40" rx="10" fill="#0f172a" stroke="#00F584" stroke-width="1.5"/>
+    <text x="205" y="24" text-anchor="middle" font-family="monospace" font-size="14" fill="#00F584">ROUTER</text>
+
+    <rect x="300" y="-18" width="110" height="36" rx="10" fill="#0f172a" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="355" y="4" text-anchor="middle" font-family="monospace" font-size="12" fill="#fbbf24">FRONTEND</text>
+
+    <rect x="300" y="30" width="110" height="36" rx="10" fill="#0f172a" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="355" y="52" text-anchor="middle" font-family="monospace" font-size="12" fill="#a78bfa">BACKEND</text>
+
+    <rect x="300" y="78" width="110" height="36" rx="10" fill="#0f172a" stroke="#fb7185" stroke-width="1.5"/>
+    <text x="355" y="100" text-anchor="middle" font-family="monospace" font-size="12" fill="#fb7185">RESEARCH</text>
+
+    <rect x="450" y="30" width="110" height="36" rx="10" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5"/>
+    <text x="505" y="52" text-anchor="middle" font-family="monospace" font-size="12" fill="#22d3ee">REVIEWER</text>
+
+    <path d="M110 20 H150" stroke="#22d3ee" stroke-width="1.5"/>
+    <path d="M260 20 H285 M285 20 V0 H300" stroke="#00F584" stroke-width="1.5"/>
+    <path d="M260 20 H285 M285 20 V48 H300" stroke="#00F584" stroke-width="1.5"/>
+    <path d="M260 20 H285 M285 20 V96 H300" stroke="#00F584" stroke-width="1.5"/>
+    <path d="M410 0 H430 M430 0 V48 H450" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4 4"/>
+    <path d="M410 48 H450" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4 4"/>
+    <path d="M410 96 H430 M430 96 V48 H450" stroke="#94a3b8" stroke-width="1.1" stroke-dasharray="4 4"/>
+  </g>
+
+  <text x="690" y="145" text-anchor="middle" font-family="monospace" font-size="70" font-weight="800" fill="url(#accent)" filter="url(#glow2)">AGENT FOUNDRY</text>
+  <circle cx="412" cy="132" r="5" fill="#00F584" filter="url(#glow)"/>
+  <line x1="352" y1="170" x2="1030" y2="170" stroke="url(#soft)" stroke-width="1.2"/>
+
+  <text x="690" y="205" text-anchor="middle" font-family="monospace" font-size="18" letter-spacing="4" fill="#94a3b8">PLANNER → ROUTER → WORKERS → REVIEWER</text>
+  <text x="690" y="236" text-anchor="middle" font-family="monospace" font-size="16" fill="#8aa0b8">build AI-operated products with a clean multi-agent architecture</text>
+
+  <g font-family="monospace" font-size="13" text-anchor="middle">
+    <rect x="388" y="270" width="104" height="30" rx="15" fill="#00F584" fill-opacity="0.08" stroke="#00F584" stroke-opacity="0.4"/>
+    <text x="440" y="289" fill="#00F584">TYPESCRIPT</text>
+
+    <rect x="508" y="270" width="90" height="30" rx="15" fill="#22d3ee" fill-opacity="0.08" stroke="#22d3ee" stroke-opacity="0.4"/>
+    <text x="553" y="289" fill="#22d3ee">MONOREPO</text>
+
+    <rect x="614" y="270" width="84" height="30" rx="15" fill="#fbbf24" fill-opacity="0.08" stroke="#fbbf24" stroke-opacity="0.4"/>
+    <text x="656" y="289" fill="#fbbf24">SWARM</text>
+
+    <rect x="714" y="270" width="100" height="30" rx="15" fill="#a78bfa" fill-opacity="0.08" stroke="#a78bfa" stroke-opacity="0.4"/>
+    <text x="764" y="289" fill="#a78bfa">REVIEWABLE</text>
+
+    <rect x="830" y="270" width="112" height="30" rx="15" fill="#fb7185" fill-opacity="0.08" stroke="#fb7185" stroke-opacity="0.4"/>
+    <text x="886" y="289" fill="#fb7185">AGENT OPS</text>
+  </g>
+
+  <g stroke="#00F584" stroke-width="2" opacity="0.32">
+    <path d="M22 14 V36 M22 14 H44"/>
+    <path d="M1178 14 V36 M1178 14 H1156"/>
+    <path d="M22 346 V324 M22 346 H44"/>
+    <path d="M1178 346 V324 M1178 346 H1156"/>
+  </g>
+</svg>

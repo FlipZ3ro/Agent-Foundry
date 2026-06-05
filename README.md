@@ -1,5 +1,9 @@
 # Agent Foundry
 
+<p align="center">
+  <img src="./assets/banner.svg" alt="Agent Foundry banner" width="100%" />
+</p>
+
 <div align="center">
 
 **Build AI-operated products with a clean multi-agent architecture.**
@@ -105,45 +109,9 @@ This turns a vague “AI app builder” into a structured system.
 
 ## Core idea
 
-```text
-                           AGENT FOUNDRY
-
-                    ┌─────────────────────────┐
-                    │        Product Idea     │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │         Planner         │
-                    │  strategy + breakdown   │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │         Router          │
-                    │ reasoning / exec / mix  │
-                    └────────────┬────────────┘
-                                 │
-                ┌────────────────┼────────────────┐
-                ▼                ▼                ▼
-      ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
-      │ Frontend Lane  │ │ Backend Lane   │ │ Research Lane  │
-      │   worker(s)    │ │   worker(s)    │ │   worker(s)    │
-      └───────┬────────┘ └───────┬────────┘ └───────┬────────┘
-              └──────────────────┴──────────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │        Reviewer         │
-                    │   pass / revise / fail  │
-                    └────────────┬────────────┘
-                                 │
-                                 ▼
-                    ┌─────────────────────────┐
-                    │      Run History        │
-                    │ jobs + results + notes  │
-                    └─────────────────────────┘
-```
+<p align="center">
+  <img src="./assets/architecture.svg" alt="Agent Foundry architecture" width="100%" />
+</p>
 
 The point is not complexity.
 
