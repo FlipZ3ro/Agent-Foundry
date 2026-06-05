@@ -29,7 +29,11 @@ export interface OrchestratorOutput {
   run: OrchestrationRun;
   pendingArtifacts: PendingArtifact[];
 }
-import { WorkerExecutor, type PendingArtifact } from "../../worker/src/index.js";
+import {
+  WorkerExecutor,
+  type PendingArtifact,
+  type UpstreamOutput
+} from "../../worker/src/index.js";
 import { Reviewer } from "../../reviewer/src/index.js";
 import {
   extractJson,
@@ -256,19 +260,26 @@ export class Orchestrator {
 
     const results: WorkerResult[] = [];
     const pendingArtifacts: PendingArtifact[] = [];
-    for (const job of jobs) {
-      const task = blueprint.tasks.find((item) => item.id === job.taskId)!;
+    const done = new Map<string, DoneEntry>();
+    // Execute in dependency order so each task can build on its upstream outputs.
+    for (const task of topoOrder(blueprint.tasks)) {
+      const job = jobs.find((j) => j.taskId === task.id)!;
       onProgress?.({ type: "task-started", taskId: task.id, jobId: job.id });
-      const output = await this.worker.run({ ...job, status: "in_progress" }, task, { idea });
+      const upstream = collectUpstream(task, blueprint, done);
+      const output = await this.worker.run({ ...job, status: "in_progress" }, task, { idea, upstream });
       results.push(output.result);
       pendingArtifacts.push(...output.pendingArtifacts);
+      done.set(task.id, {
+        result: output.result,
+        files: output.pendingArtifacts.map((a) => ({ path: a.path, content: a.content }))
+      });
       onProgress?.({ type: "task-completed", taskId: task.id, result: output.result });
     }
 
     const executedEntry: RunHistoryEntry = {
       at: new Date().toISOString(),
       stage: "executed",
-      detail: `Worker layer completed ${results.length} jobs.`
+      detail: `Worker layer completed ${results.length} jobs in dependency order.`
     };
     onProgress?.({ type: "history", entry: executedEntry });
 
@@ -319,18 +330,38 @@ export class Orchestrator {
 
     const results: WorkerResult[] = [];
     const pendingArtifacts: PendingArtifact[] = [];
-    for (const result of parentRun.results) {
-      if (!replayAll && !failedTaskIds.has(result.taskId)) {
-        results.push(result);
-        onProgress?.({ type: "task-completed", taskId: result.taskId, result });
+    const done = new Map<string, DoneEntry>();
+    // Seed kept (approved) results so re-run dependents still see their upstream summaries.
+    const keptById = new Map(parentRun.results.map((r) => [r.taskId, r]));
+    const reviewByTask = new Map(parentRun.reviews.map((r) => [r.taskId, r]));
+
+    for (const task of topoOrder(blueprint.tasks)) {
+      const kept = keptById.get(task.id);
+      if (kept && !replayAll && !failedTaskIds.has(task.id)) {
+        results.push(kept);
+        done.set(task.id, { result: kept, files: [] });
+        onProgress?.({ type: "task-completed", taskId: task.id, result: kept });
         continue;
       }
-      const task = blueprint.tasks.find((item) => item.id === result.taskId)!;
-      const job = parentRun.jobs.find((item) => item.taskId === result.taskId)!;
+      const job = parentRun.jobs.find((item) => item.taskId === task.id)!;
       onProgress?.({ type: "task-started", taskId: task.id, jobId: job.id });
-      const output = await this.worker.run({ ...job, status: "in_progress" }, task, { idea: parentRun.idea });
+      const upstream = collectUpstream(task, blueprint, done);
+      const prevReview = reviewByTask.get(task.id);
+      const feedback =
+        prevReview && prevReview.status !== "approved" && kept
+          ? { notes: prevReview.notes, previousSummary: kept.summary }
+          : undefined;
+      const output = await this.worker.run(
+        { ...job, status: "in_progress" },
+        task,
+        { idea: parentRun.idea, upstream, feedback }
+      );
       results.push(output.result);
       pendingArtifacts.push(...output.pendingArtifacts);
+      done.set(task.id, {
+        result: output.result,
+        files: output.pendingArtifacts.map((a) => ({ path: a.path, content: a.content }))
+      });
       onProgress?.({ type: "task-completed", taskId: task.id, result: output.result });
     }
 
@@ -371,6 +402,70 @@ export class Orchestrator {
 
     return { blueprint, run, pendingArtifacts };
   }
+}
+
+interface DoneEntry {
+  result: WorkerResult;
+  files: Array<{ path: string; content: string }>;
+}
+
+/**
+ * Order tasks so every task appears after all of its (in-graph) dependencies.
+ * Kahn's algorithm; preserves original order among same-depth tasks and appends
+ * any cycle remnants in original order so execution never stalls.
+ */
+export function topoOrder(tasks: TaskSpec[]): TaskSpec[] {
+  const byId = new Map(tasks.map((t) => [t.id, t]));
+  const indeg = new Map<string, number>();
+  const adj = new Map<string, string[]>();
+  for (const t of tasks) {
+    indeg.set(t.id, 0);
+    adj.set(t.id, []);
+  }
+  for (const t of tasks) {
+    for (const dep of t.dependencies) {
+      if (byId.has(dep)) {
+        adj.get(dep)!.push(t.id);
+        indeg.set(t.id, (indeg.get(t.id) ?? 0) + 1);
+      }
+    }
+  }
+  const queue = tasks.filter((t) => (indeg.get(t.id) ?? 0) === 0).map((t) => t.id);
+  const ordered: TaskSpec[] = [];
+  const seen = new Set<string>();
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    ordered.push(byId.get(id)!);
+    for (const next of adj.get(id) ?? []) {
+      indeg.set(next, (indeg.get(next) ?? 0) - 1);
+      if ((indeg.get(next) ?? 0) === 0) queue.push(next);
+    }
+  }
+  for (const t of tasks) if (!seen.has(t.id)) ordered.push(t);
+  return ordered;
+}
+
+function collectUpstream(
+  task: TaskSpec,
+  blueprint: ProjectBlueprint,
+  done: Map<string, DoneEntry>
+): UpstreamOutput[] {
+  const out: UpstreamOutput[] = [];
+  for (const depId of task.dependencies) {
+    const entry = done.get(depId);
+    if (!entry) continue;
+    const depTask = blueprint.tasks.find((t) => t.id === depId);
+    out.push({
+      taskId: depId,
+      title: depTask?.title ?? depId,
+      lane: entry.result.lane,
+      summary: entry.result.summary,
+      files: entry.files
+    });
+  }
+  return out;
 }
 
 function aggregateMetrics(results: WorkerResult[], reviews: ReviewDecision[]): RunMetrics {

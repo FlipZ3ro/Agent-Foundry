@@ -31,9 +31,27 @@ interface WorkerLlmShape {
   files?: Array<{ path: string; content: string }>;
 }
 
+/** Output of a completed upstream task, handed to dependents as context. */
+export interface UpstreamOutput {
+  taskId: string;
+  title: string;
+  lane: string;
+  summary: string;
+  files: Array<{ path: string; content: string }>;
+}
+
+/** Reviewer feedback from a prior rejected attempt, fed back on retry. */
+export interface RetryFeedback {
+  notes: string[];
+  previousSummary: string;
+}
+
 const ARTIFACTS_ENABLED = (process.env.WORKER_EMIT_ARTIFACTS ?? "true") !== "false";
 const MAX_FILES_PER_TASK = Number(process.env.WORKER_MAX_FILES ?? "5");
 const MAX_FILE_BYTES = Number(process.env.WORKER_MAX_FILE_BYTES ?? "8192");
+const MAX_UPSTREAM_TASKS = Number(process.env.WORKER_MAX_UPSTREAM ?? "6");
+const MAX_UPSTREAM_FILES = Number(process.env.WORKER_MAX_UPSTREAM_FILES ?? "3");
+const MAX_UPSTREAM_FILE_BYTES = Number(process.env.WORKER_MAX_UPSTREAM_FILE_BYTES ?? "1400");
 
 export { getLaneConfig, listLaneConfigs, type LaneWorkerConfig } from "./lanes.js";
 
@@ -46,6 +64,8 @@ const DURATION_MS_PER_OUTPUT = 40;
 
 interface RunContext {
   idea: string;
+  upstream?: UpstreamOutput[];
+  feedback?: RetryFeedback;
 }
 
 export class WorkerExecutor {
@@ -77,13 +97,16 @@ export class WorkerExecutor {
       ? `${lane.persona}\n\n${lane.outputDirective}\n\nAdditionally, emit real implementation content for the declared output files (TypeScript / Python / YAML / Markdown / SQL as appropriate). Each file's content must be a realistic, runnable starting point ≤ ${MAX_FILE_BYTES} bytes — no placeholders or "TODO" stubs. Cover at most ${MAX_FILES_PER_TASK} files. Respond ONLY as JSON:\n{"summary": "the brief", "files": [{"path": "src/foo.ts", "content": "actual code/text…"}]}\nIf a declared output is not produceable at this layer (e.g. binary), omit it from files but keep the path in summary.`
       : `${lane.persona}\n\n${lane.outputDirective}\nNo prose preamble. No markdown code fences.`;
 
+    const upstreamBlock = buildUpstreamBlock(ctx.upstream);
+    const feedbackBlock = buildFeedbackBlock(ctx.feedback);
+
     const userPrompt = `Idea: ${ctx.idea}
 Task: ${task.title}
 Objective: ${task.objective}
 Acceptance criteria:
 ${acceptance}
 ${declared.length ? `\nDeclared output paths (target file list):\n${declared.map((p) => `- ${p}`).join("\n")}` : ""}
-${skillPrompt ? `\nSkill guidance:\n${skillPrompt}` : ""}`;
+${skillPrompt ? `\nSkill guidance:\n${skillPrompt}` : ""}${upstreamBlock}${feedbackBlock}`;
 
     const messages: ChatMessage[] = [
       { role: "system", content: systemPrompt },
@@ -150,6 +173,24 @@ ${skillPrompt ? `\nSkill guidance:\n${skillPrompt}` : ""}`;
     };
     return { result, pendingArtifacts: [] };
   }
+}
+
+function buildUpstreamBlock(upstream: UpstreamOutput[] | undefined): string {
+  if (!upstream || upstream.length === 0) return "";
+  const items = upstream.slice(0, MAX_UPSTREAM_TASKS).map((u) => {
+    const files = u.files
+      .slice(0, MAX_UPSTREAM_FILES)
+      .map((f) => `  • ${f.path}\n\`\`\`\n${f.content.slice(0, MAX_UPSTREAM_FILE_BYTES)}\n\`\`\``)
+      .join("\n");
+    return `### ${u.taskId} — ${u.title} (${u.lane})\n${u.summary}${files ? `\nFiles:\n${files}` : ""}`;
+  });
+  return `\n\n## Upstream context — already produced by earlier agents in this run. Build ON these (import them, match their names/types); do NOT re-implement them:\n${items.join("\n\n")}`;
+}
+
+function buildFeedbackBlock(feedback: RetryFeedback | undefined): string {
+  if (!feedback || feedback.notes.length === 0) return "";
+  const notes = feedback.notes.map((n) => `- ${n}`).join("\n");
+  return `\n\n## Previous attempt was REJECTED by review. Address every note precisely and do not repeat the same gaps:\n${notes}\n\nPrevious summary (for reference):\n${feedback.previousSummary.slice(0, 600)}`;
 }
 
 function extractSummaryFromTruncated(content: string): string | null {

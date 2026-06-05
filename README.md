@@ -66,6 +66,9 @@ Each layer falls back to a deterministic stub when no API key is set, so tests a
 | Lane-specific worker personas (frontend/backend/data/assets/review) | done |
 | In-process queue (p-queue) with concurrency cap + queue stats endpoint | done |
 | Artifact storage — workers write real files to disk per task | done |
+| Dependency-aware (DAG) execution order | done |
+| Context-passing — downstream workers build on upstream outputs | done |
+| Feedback loop — retry feeds reviewer notes back to the worker | done |
 | CI workflow (`.github/workflows/test.yml`) | done |
 | ESLint flat config | done |
 | Multi-stage Dockerfile | done |
