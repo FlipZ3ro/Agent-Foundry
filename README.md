@@ -1,8 +1,21 @@
 # Agent Foundry
 
-> Repository: `FlipZ3ro/Agent-Foundry`
+<div align="center">
 
 **Build AI-operated products with a clean multi-agent architecture.**
+
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-ESM-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Architecture](https://img.shields.io/badge/Architecture-Planner%20%E2%86%92%20Router%20%E2%86%92%20Workers%20%E2%86%92%20Reviewer-111111?style=for-the-badge)](#core-idea)
+[![Status](https://img.shields.io/badge/Status-Prototype-8A2BE2?style=for-the-badge)](#status)
+
+*Repository:* `FlipZ3ro/Agent-Foundry`
+
+</div>
+
+---
+
+## Overview
 
 Agent Foundry is a TypeScript monorepo starter for building agentic SaaS systems around one simple idea:
 
@@ -31,7 +44,7 @@ Agent Foundry is for teams who want to build:
 - autonomous product builders
 - reviewable agent workflows with explicit contracts
 
-Current state:
+### Current state
 
 - runnable demo: **yes**
 - typed schemas: **yes**
@@ -93,18 +106,44 @@ This turns a vague “AI app builder” into a structured system.
 
 ## Core idea
 
-The architecture is intentionally simple:
-
 ```text
-Idea
-  -> Planner
-  -> ProjectBlueprint
-  -> Router
-  -> RoutingDecision[]
-  -> WorkerJob[]
-  -> WorkerResult[]
-  -> ReviewDecision[]
-  -> OrchestrationRun
+                           AGENT FOUNDRY
+
+                    ┌─────────────────────────┐
+                    │        Product Idea     │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │         Planner         │
+                    │  strategy + breakdown   │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │         Router          │
+                    │ reasoning / exec / mix  │
+                    └────────────┬────────────┘
+                                 │
+                ┌────────────────┼────────────────┐
+                ▼                ▼                ▼
+      ┌────────────────┐ ┌────────────────┐ ┌────────────────┐
+      │ Frontend Lane  │ │ Backend Lane   │ │ Research Lane  │
+      │   worker(s)    │ │   worker(s)    │ │   worker(s)    │
+      └───────┬────────┘ └───────┬────────┘ └───────┬────────┘
+              └──────────────────┴──────────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │        Reviewer         │
+                    │   pass / revise / fail  │
+                    └────────────┬────────────┘
+                                 │
+                                 ▼
+                    ┌─────────────────────────┐
+                    │      Run History        │
+                    │ jobs + results + notes  │
+                    └─────────────────────────┘
 ```
 
 The point is not complexity.
@@ -116,6 +155,30 @@ The point is to make these things explicit:
 - what got executed
 - what passed review
 - what happened during the run
+
+---
+
+## Feature snapshot
+
+### Implemented
+
+- [x] typed schema layer
+- [x] planner -> router -> worker -> reviewer flow
+- [x] orchestration run shape
+- [x] demo entrypoint
+- [x] routing decisions in run output
+- [x] run history entries
+
+### Planned
+
+- [ ] persistent run storage
+- [ ] HTTP API
+- [ ] retry loop on failed review
+- [ ] lane-specific worker implementations
+- [ ] real subagent execution
+- [ ] dashboard UI
+- [ ] metrics and cost tracking
+- [ ] skill/template registry
 
 ---
 
@@ -326,7 +389,7 @@ The important part is that the system shape is explicit:
 
 ---
 
-## What this repo is good for
+## Use cases
 
 This repo is a strong base for building:
 
@@ -337,6 +400,34 @@ This repo is a strong base for building:
 - research and synthesis systems
 - code generation and review pipelines
 - batch execution systems with approval checkpoints
+
+---
+
+## Roadmap
+
+### Phase 1 — Foundation
+- [x] typed contracts
+- [x] orchestration flow
+- [x] routing decisions
+- [x] run history shape
+
+### Phase 2 — Runtime
+- [ ] persistent run storage
+- [ ] HTTP API
+- [ ] retry / replay flow
+- [ ] queue-backed execution
+
+### Phase 3 — Specialization
+- [ ] lane-specific workers
+- [ ] model-aware router policies
+- [ ] cost estimation
+- [ ] richer reviewer rules
+
+### Phase 4 — Productization
+- [ ] dashboard UI
+- [ ] auth
+- [ ] billing / usage tracking
+- [ ] team / workspace support
 
 ---
 
