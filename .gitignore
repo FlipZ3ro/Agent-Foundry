@@ -3,6 +3,7 @@ node_modules
 .turbo
 .env
 .env.*
+!.env.example
 dist
 build
 coverage
@@ -14,6 +15,7 @@ __pycache__
 pnpm-lock.yaml
 package-lock.json
 yarn.lock
+runs/
 dist/
 *.tsbuildinfo
 node_modules/

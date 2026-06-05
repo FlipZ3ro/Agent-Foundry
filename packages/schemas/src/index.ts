@@ -43,6 +43,20 @@ export interface WorkerJob {
   route: RoutingDecision;
 }
 
+export interface JobMetrics {
+  tokensUsed: number;
+  costUsd: number;
+  durationMs: number;
+}
+
+export interface RunMetrics {
+  totalTokens: number;
+  totalCostUsd: number;
+  jobCount: number;
+  approvedCount: number;
+  changesRequestedCount: number;
+}
+
 export interface WorkerResult {
   jobId: string;
   taskId: string;
@@ -50,6 +64,7 @@ export interface WorkerResult {
   status: Exclude<JobStatus, "queued" | "routed" | "in_progress">;
   summary: string;
   producedFiles: string[];
+  metrics?: JobMetrics;
 }
 
 export interface ReviewDecision {
@@ -76,6 +91,8 @@ export interface OrchestrationRun {
   history: RunHistoryEntry[];
   startedAt?: string;
   completedAt?: string;
+  retryOf?: string;
+  metrics?: RunMetrics;
 }
 
 export function createTaskId(prefix: string, index: number): string {

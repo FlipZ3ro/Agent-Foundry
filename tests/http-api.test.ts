@@ -88,5 +88,6 @@ describe("Agent Foundry HTTP API", () => {
     assert.ok(retried.id);
     assert.notEqual(retried.id, created.id);
     assert.equal(retried.idea, created.idea);
+    assert.equal(retried.retryOf, created.id);
   });
 });

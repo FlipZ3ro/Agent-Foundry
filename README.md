@@ -6,13 +6,12 @@
 
 <div align="center">
 
-**Build AI-operated products with a clean multi-agent architecture.**
+**An LLM-operated product factory with a clean planner → router → worker → reviewer architecture.**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Node.js](https://img.shields.io/badge/Node.js-ESM-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![Architecture](https://img.shields.io/badge/Architecture-Planner%20%E2%86%92%20Router%20%E2%86%92%20Workers%20%E2%86%92%20Reviewer-111111?style=for-the-badge)](#core-idea)
-[![Status](https://img.shields.io/badge/Status-Prototype-8A2BE2?style=for-the-badge)](#status)
-
+[![Node.js](https://img.shields.io/badge/Node.js-22%20ESM-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![LLM](https://img.shields.io/badge/LLM-Xiaomi%20MiMo-FF6900?style=for-the-badge)](https://xiaomimimo.com/)
+[![Status](https://img.shields.io/badge/Status-Working%20Prototype-00d992?style=for-the-badge)](#status)
 
 </div>
 
@@ -20,220 +19,153 @@
 
 ## Overview
 
-Agent Foundry is a TypeScript monorepo starter for building agentic SaaS systems around one simple idea:
+Agent Foundry is a TypeScript monorepo that turns an idea into a reviewed multi-task build run, driven by an LLM.
 
-**planner -> router -> worker swarm -> reviewer**
+**planner → router → worker swarm → reviewer**
 
-Instead of sending every task to one expensive general-purpose model, Agent Foundry separates:
+Each lane has its own responsibility, its own model choice, and its own contract:
 
-- **reasoning**
-- **routing**
-- **execution**
-- **review**
-- **run history**
+- **Planner** decomposes the idea into a typed task graph
+- **Router** decides whether each task is reasoning-heavy, execution-heavy, or hybrid
+- **Worker swarm** executes tasks against skill prompts
+- **Reviewer** judges each output against acceptance criteria
+- **Run history + metrics** capture the full lifecycle
 
-That makes the system easier to scale, inspect, debug, and evolve.
-
----
-
-## TL;DR
-
-Agent Foundry is for teams who want to build:
-
-- AI SaaS factories
-- internal agent ops platforms
-- research and content pipelines
-- multi-lane execution systems
-- autonomous product builders
-- reviewable agent workflows with explicit contracts
-
-### Current state
-
-- runnable demo: **yes**
-- typed schemas: **yes**
-- routing layer: **yes**
-- run history shape: **yes**
-- HTTP API: **not yet**
-- persistent storage: **not yet**
-- real dashboard UI: **not yet**
+The whole pipeline is observable, replayable, and persisted to disk.
 
 ---
 
-## Why Agent Foundry
+## What's different now
 
-The name is short, clean, and broad.
+The repo used to be a deterministic scaffold — Planner returned 3 hardcoded tasks regardless of input, Reviewer always approved. **That's changed.** All three reasoning layers now call a real LLM (Xiaomi MiMo, OpenAI-compatible endpoint) with structured prompts and parsed JSON responses.
 
-It feels like a place where products get built.
-
-That fits the repo better than a long descriptive name, because this project is not just a SaaS scaffold — it is intended to become an **agent operating system for product creation**.
-
-Other names that also work:
-
-- `SaaS Foundry`
-- `BuildSwarm`
-- `TaskForge`
-- `LaunchOS`
-
-But **Agent Foundry** is the best balance of:
-
-- simple
-- memorable
-- flexible
-- brandable
+Each layer falls back to a deterministic stub when no API key is set, so tests and CI run without burning tokens.
 
 ---
 
-## The problem this repo is solving
+## Current state
 
-Most teams overpay for AI workflows because they route everything through one strong model.
-
-That creates three problems:
-
-1. **cost explosion**
-2. **unclear task boundaries**
-3. **poor observability**
-
-Agent Foundry takes a different approach.
-
-It assumes different layers should do different jobs:
-
-- **Planner** handles decomposition, strategy, and quality thresholds
-- **Router** decides whether a task is reasoning-heavy, execution-heavy, or hybrid
-- **Worker swarm** handles clear, parallelizable output generation
-- **Reviewer** checks results before acceptance
-- **Run history** records what happened across the lifecycle
-
-This turns a vague “AI app builder” into a structured system.
+| Capability | Status |
+| --- | --- |
+| Typed schemas | done |
+| Planner → router → worker → reviewer flow | done |
+| **LLM-backed Planner** (MiMo) | done |
+| **LLM-backed Worker** (MiMo) | done |
+| **LLM-backed Reviewer** (MiMo) | done |
+| File-based run persistence | done |
+| HTTP API (`/runs` CRUD + replay) | done |
+| Real retry semantics (replay only failed tasks) | done |
+| Skill registry | done |
+| Typed SDK client | done |
+| Cost + token tracking per run | done |
+| Operator dashboard (Vite + React) | done |
+| CI workflow (`.github/workflows/test.yml`) | done |
+| ESLint flat config | done |
+| Multi-stage Dockerfile | done |
+| Stub fallback when no API key | done |
+| 32 tests across 8 suites | passing |
+| Queue-backed execution | not yet |
+| Auth / billing / workspaces | not yet |
+| Model-aware router policies | not yet |
 
 ---
 
-## Core idea
+## Architecture
 
 <p align="center">
   <img src="./assets/architecture-devtools.svg" alt="Agent Foundry architecture" width="720" />
 </p>
 
-> Architecture style uses a VoltAgent-style hardcore devtools look:
-> near-black canvas `#050507`, carbon surfaces `#101010`, warm charcoal containment `#3d3a39`,
-> and a single signal accent in emerald `#00d992`.
+> Style: VoltAgent-style devtools aesthetic — near-black canvas `#08080b`, glass surfaces, emerald `#34e2a4` accent with subtle violet/amber/sky semantics.
 
-The point is not complexity.
+LLM injection points:
 
-The point is to make these things explicit:
+```
+idea
+ │
+ ▼
+[Planner] ──── MiMo (mimo-v2.5-pro) → decomposes into 3–6 TaskSpec[]
+ │
+ ▼
+[Router]  ──── deterministic policy → RoutingDecision per task
+ │
+ ▼
+[Worker swarm] ─ MiMo (mimo-v2.5) → executes against skill prompt
+ │
+ ▼
+[Reviewer] ─── MiMo (mimo-v2.5-pro) → approves or requests changes
+ │
+ ▼
+OrchestrationRun (persisted to runs/)
+```
 
-- what was planned
-- how it was routed
-- what got executed
-- what passed review
-- what happened during the run
-
----
-
-## Feature snapshot
-
-### Implemented
-
-- [x] typed schema layer
-- [x] planner -> router -> worker -> reviewer flow
-- [x] orchestration run shape
-- [x] demo entrypoint
-- [x] routing decisions in run output
-- [x] run history entries
-
-### Planned
-
-- [ ] persistent run storage
-- [ ] HTTP API
-- [ ] retry loop on failed review
-- [ ] lane-specific worker implementations
-- [ ] real subagent execution
-- [ ] dashboard UI
-- [ ] metrics and cost tracking
-- [ ] skill/template registry
+Each LLM call records actual token usage and cost; the run aggregates totals.
 
 ---
 
-## What exists right now
+## Quick start
 
-### Shared schemas
-Located in:
-- `packages/schemas`
+### 1. Install
 
-Current contracts include:
-- `ProjectBlueprint`
-- `TaskSpec`
-- `AcceptanceCriterion`
-- `RoutingDecision`
-- `WorkerJob`
-- `WorkerResult`
-- `ReviewDecision`
-- `RunHistoryEntry`
-- `OrchestrationRun`
+```bash
+npm install
+```
 
-### Services
-Located in:
-- `services/orchestrator`
-- `services/worker`
-- `services/reviewer`
+### 2. Configure MiMo (optional but recommended)
 
-Current responsibilities:
+Copy `.env.example` to `.env` and fill in your endpoint + key:
 
-#### `services/orchestrator`
-- creates the project blueprint
-- applies routing decisions
-- creates jobs
-- collects results
-- assembles the final run object
-- exposes the demo entrypoint
+```bash
+cp .env.example .env
+```
 
-#### `services/worker`
-- simulates task execution
-- returns summaries and produced files
+```env
+MIMO_BASE_URL=https://token-plan-sgp.xiaomimimo.com/v1
+MIMO_API_KEY=your-tp-key
+MIMO_PLANNER_MODEL=mimo-v2.5-pro
+MIMO_WORKER_MODEL=mimo-v2.5
+MIMO_REVIEWER_MODEL=mimo-v2.5-pro
+```
 
-#### `services/reviewer`
-- applies a simple quality gate
-- approves or rejects based on declared outputs
+Without a key, the system runs deterministic stub agents.
 
-### App placeholders
-Located in:
-- `apps/web`
-- `apps/dashboard`
+### 3. Run the API
 
-Intended future roles:
-- public product or marketing shell
-- operator dashboard
-- run viewer / control plane
+```bash
+npm run api
+```
 
----
+Listens on `http://localhost:3210`. Persists runs to `./runs/*.json`.
 
-## Current architecture
+Endpoints:
+- `POST /runs` — create a run from an idea
+- `GET /runs` — list summaries
+- `GET /runs/:id` — fetch full run
+- `POST /runs/:id/retry` — replay only the failed tasks (preserves approved ones)
 
-The repo currently implements a minimal prototype of this flow:
+### 4. Run the dashboard
 
-1. **Planner** creates a `ProjectBlueprint`
-2. **Router** classifies tasks into execution modes
-3. **Orchestrator** creates routed `WorkerJob[]`
-4. **Worker layer** produces `WorkerResult[]`
-5. **Reviewer** returns `ReviewDecision[]`
-6. **Run history** captures the lifecycle of the run
+```bash
+npm run dashboard
+```
 
-Execution modes currently modeled in schema:
+Operator UI at `http://localhost:5173`. Proxies `/runs` to the API.
 
-- `reasoning`
-- `execution`
-- `hybrid`
+### 5. Run the headless demo
 
----
+```bash
+npm run demo
+```
 
-## Example routing logic
+Runs a sample idea through the full pipeline and prints the run JSON.
 
-The demo uses simple heuristics right now:
+### 6. Run tests
 
-- **frontend tasks** with clear outputs -> `execution`
-- **backend contract tasks** -> `hybrid`
-- **coordination-heavy tasks** with dependencies -> `reasoning`
+```bash
+npm test
+```
 
-This is intentionally lightweight, but it proves the shape of the system.
+All tests use mocked fetch or stub fallback — no live LLM calls in CI.
 
 ---
 
@@ -242,284 +174,178 @@ This is intentionally lightweight, but it proves the shape of the system.
 ```text
 Agent-Foundry/
 ├── apps/
-│   ├── dashboard/
-│   └── web/
-├── docs/
-│   ├── architecture/
-│   └── examples/
-├── infra/
+│   ├── dashboard/        # Vite + React + TS operator UI
+│   └── web/              # public-facing shell (stub)
 ├── packages/
-│   ├── config/
-│   ├── prompts/
-│   ├── schemas/
-│   ├── sdk/
-│   └── ui/
-├── scripts/
+│   ├── schemas/          # shared typed contracts
+│   ├── llm/              # MiMo OpenAI-compatible client
+│   ├── prompts/          # skill registry + prompt templates
+│   ├── sdk/              # typed HTTP client (createRun, getRun, retry…)
+│   ├── ui/               # placeholder
+│   └── config/           # placeholder
 ├── services/
-│   ├── orchestrator/
-│   ├── reviewer/
-│   └── worker/
-└── templates/
+│   ├── orchestrator/     # Planner + Router + Orchestrator
+│   ├── worker/           # WorkerExecutor (LLM-backed)
+│   ├── reviewer/         # Reviewer (LLM-backed)
+│   └── http/             # Express API + MemoryRunStore + FileRunStore
+├── tests/                # 8 suites — http-api, file-store, metrics,
+│                         #            sdk, skill-registry, llm-client, …
+├── infra/                # docker + github reference stubs
+├── .github/workflows/    # CI: lint + build + test
+├── Dockerfile            # multi-stage build for the HTTP API
+└── eslint.config.js
 ```
 
 ---
 
-## Repo map
+## Schema contracts
 
-### `packages/schemas`
-Source of truth for contracts shared across planner, router, worker lanes, and reviewers.
+Defined in `packages/schemas/src/index.ts`:
 
-### `services/orchestrator`
-Main coordination layer.
-
-Contains:
-- blueprint planning
-- routing logic
-- job creation
-- run assembly
-- demo flow
-
-### `services/worker`
-Worker abstraction that turns a routed task into an execution result.
-
-### `services/reviewer`
-Review abstraction that decides whether a worker result is acceptable.
-
-### `apps/dashboard`
-Future operator UI for:
-- viewing runs
-- retrying failed tasks
-- inspecting routing decisions
-- tracking quality
-- tracking cost
-
-### `apps/web`
-Future public-facing shell.
-
-### `docs/architecture`
-Architecture notes and repo map.
-
-### `docs/examples`
-Examples of task and run behavior.
+- `ProjectBlueprint` — `{ id, idea, summary, lanes, tasks }`
+- `TaskSpec` — `{ id, title, lane, objective, dependencies[], acceptanceCriteria[], outputs[] }`
+- `RoutingDecision` — `{ taskId, mode: reasoning|execution|hybrid, owner, reason, rubricReady }`
+- `WorkerJob` — `{ id, taskId, lane, status, route }`
+- `WorkerResult` — `{ jobId, taskId, lane, status, summary, producedFiles[], metrics? }`
+- `ReviewDecision` — `{ taskId, status: approved|changes_requested, notes[] }`
+- `JobMetrics` — `{ tokensUsed, costUsd, durationMs }`
+- `RunMetrics` — `{ totalTokens, totalCostUsd, jobCount, approvedCount, changesRequestedCount }`
+- `OrchestrationRun` — full lifecycle including `routingDecisions[]`, `jobs[]`, `results[]`, `reviews[]`, `history[]`, `metrics`, `retryOf?`
 
 ---
 
-## Quick start
-
-### Install
-
-```bash
-npm install
-```
-
-### Run the demo
-
-```bash
-npm run demo
-```
-
-### Run tests
-
-```bash
-npm test
-```
-
-### Start the HTTP API
-
-```bash
-npm run api
-```
-
-Server:
-- `http://localhost:3210`
-
-Available endpoints:
-- `POST /runs`
-- `GET /runs`
-- `GET /runs/:id`
-- `POST /runs/:id/retry`
-
-Example:
+## Live example
 
 ```bash
 curl -X POST http://localhost:3210/runs \
   -H 'Content-Type: application/json' \
-  -d '{"idea":"Build a crypto + macro SaaS factory MVP"}'
+  -d '{"idea":"Notion-to-Slack daily digest agent that filters tasks by priority"}'
 ```
 
-### Run tests
-
-```bash
-npm test
-```
-
-### Build core packages
-
-```bash
-npm run build:core
-```
-
----
-
-## Example output
-
-The demo returns a structured object like this:
+Real planner output (excerpt):
 
 ```json
 {
-  "blueprint": {
-    "id": "blueprint-001",
-    "idea": "Build a crypto + macro SaaS factory MVP"
-  },
-  "run": {
-    "id": "run-001",
-    "status": "completed",
-    "routingDecisions": [],
-    "jobs": [],
-    "results": [],
-    "reviews": [],
-    "history": []
+  "history": [{
+    "stage": "planned",
+    "detail": "Planner created 6 tasks: Build an agent that pulls Notion tasks, filters them by priority, and sends a daily digest message to a Slack channel."
+  }],
+  "reviews": [
+    {
+      "taskId": "task-02",
+      "status": "changes_requested",
+      "notes": [
+        "Worker summary lacks details on implementation and test coverage.",
+        "No evidence provided that filters.py and test_filters.py contain required logic and tests."
+      ]
+    },
+    {
+      "taskId": "task-03",
+      "status": "approved",
+      "notes": [
+        "File created at specified location.",
+        "Function generates Slack Block Kit JSON with header, date, and grouped tasks.",
+        "Handles empty list with fallback message."
+      ]
+    }
+  ],
+  "metrics": {
+    "totalTokens": 3354,
+    "totalCostUsd": 0.002683,
+    "jobCount": 6,
+    "approvedCount": 2,
+    "changesRequestedCount": 4
   }
 }
 ```
 
-The important part is not the placeholder values.
-
-The important part is that the system shape is explicit:
-
-- planning is explicit
-- routing is explicit
-- execution is explicit
-- review is explicit
-- run history is explicit
+Notice that Reviewer judgments are **per-task and specific** — it cites actual missing artifacts. `POST /runs/:id/retry` will then replay only the 4 failed tasks, preserving the 2 approved ones.
 
 ---
 
-## Use cases
+## Stub vs LLM mode
 
-This repo is a strong base for building:
+| Behavior | Stub mode (no key) | LLM mode (MiMo) |
+| --- | --- | --- |
+| Planner | 3 hardcoded tasks | 3–6 tasks dynamically generated from the idea |
+| Worker | template string per lane | real summary generated by `mimo-v2.5` |
+| Reviewer | passes if any output declared | per-criterion judgment with actionable notes |
+| Tokens / cost | estimated from output count | real `usage.total_tokens` from response |
+| Run duration | ~50ms | ~60–90s (6 tasks × planner + worker + reviewer calls) |
+| Tests | passes | not exercised in CI |
 
-- AI SaaS factories
-- internal agent ops platforms
-- multi-lane workflow systems
-- autonomous content pipelines
-- research and synthesis systems
-- code generation and review pipelines
-- batch execution systems with approval checkpoints
+The mode is selected automatically by presence of `MIMO_API_KEY`.
 
 ---
 
-## Roadmap
+## Docker
 
-### Phase 1 — Foundation
-- [x] typed contracts
-- [x] orchestration flow
-- [x] routing decisions
-- [x] run history shape
+```bash
+docker build -t agent-foundry .
+docker run -p 3210:3210 \
+  -e MIMO_BASE_URL="$MIMO_BASE_URL" \
+  -e MIMO_API_KEY="$MIMO_API_KEY" \
+  -v "$(pwd)/runs:/data/runs" \
+  agent-foundry
+```
 
-### Phase 2 — Runtime
-- [ ] persistent run storage
-- [ ] HTTP API
-- [ ] retry / replay flow
-- [ ] queue-backed execution
-
-### Phase 3 — Specialization
-- [ ] lane-specific workers
-- [ ] model-aware router policies
-- [ ] cost estimation
-- [ ] richer reviewer rules
-
-### Phase 4 — Productization
-- [ ] dashboard UI
-- [ ] auth
-- [ ] billing / usage tracking
-- [ ] team / workspace support
+Runs are persisted to the mounted `/data/runs` volume.
 
 ---
 
 ## Design principles
 
-This repo is being shaped around a few simple ideas:
-
-- **Reasoning is expensive** -> use it where judgment matters
-- **Execution should scale** -> route clear tasks to workers
-- **Review should be explicit** -> never silently accept outputs
-- **History matters** -> every run should be inspectable
-- **Contracts first** -> define schemas before infra
-
----
-
-## What is still missing
-
-This is still a scaffold / prototype.
-
-Not implemented yet:
-
-- persistent run storage
-- HTTP API for creating and managing runs
-- actual queue system
-- retry loop on failed review
-- lane-specific worker implementations
-- real subagent execution
-- auth and billing
-- dashboard UI
-- metrics and cost tracking
-- skill/template registry
+- **Contracts first** — every layer speaks typed schemas, not free-form strings
+- **Reasoning is expensive** — route clear tasks to a cheaper model, keep judgment for the strong model
+- **Review must be explicit** — never silently accept worker output
+- **Replay must be cheap** — retry replays only failed tasks, not whole runs
+- **Observability is non-negotiable** — every run is a JSON document on disk
+- **Stub everything** — every LLM call has a deterministic fallback so CI stays free
 
 ---
 
-## Best next steps
+## Roadmap
 
-If you want to evolve this into a real platform, the most valuable next changes are:
-
-### 1. Persist run history
-Save each `OrchestrationRun` into a `runs/` directory or a database.
-
-### 2. Add HTTP API
-Expose endpoints like:
-- `POST /runs`
-- `GET /runs/:id`
-- `POST /runs/:id/retry`
-
-### 3. Add real router policies
-Replace demo heuristics with task classification rules based on:
-- ambiguity
-- dependency count
-- output clarity
-- reviewability
-- estimated cost
-
-### 4. Add lane-specific workers
-Examples:
-- `research-worker`
-- `frontend-worker`
-- `backend-worker`
-- `content-worker`
-- `qa-worker`
-
-### 5. Add dashboard
-Show:
-- runs
-- task graph
+### Phase 1 — Foundation ✓
+- typed contracts
+- orchestration flow
 - routing decisions
-- failures
-- review notes
-- estimated cost savings
+- run history shape
+- LLM-backed planner / worker / reviewer
+
+### Phase 2 — Runtime ✓
+- persistent file-based run storage
+- HTTP API
+- retry / replay flow with failed-task isolation
+- typed SDK client
+- operator dashboard
+
+### Phase 3 — Specialization
+- [ ] lane-specific workers (research, frontend, backend, content, qa)
+- [ ] model-aware router policies (haiku for execution, sonnet for reasoning)
+- [ ] queue-backed execution for long pipelines
+- [ ] richer reviewer rules with rubric scoring
+- [ ] streaming run updates to the dashboard
+
+### Phase 4 — Productization
+- [ ] auth + team workspaces
+- [ ] billing / usage tracking
+- [ ] hosted MCP server exposing `/runs` to other agents
+- [ ] artifact storage (worker-produced files actually written to disk)
 
 ---
 
 ## Status
 
-Current status:
-- runnable demo: yes
-- typed schemas: yes
-- routing layer: yes
-- run history shape: yes
-- persistent backend: not yet
-- real product apps: not yet
+Working prototype with real LLM execution. Not production-grade. Use it as:
+
+- a starter for your own agentic SaaS factory
+- an internal operator tool for multi-lane LLM workflows
+- a reference architecture for the planner/router/worker/reviewer pattern
+- a sandbox for testing prompt engineering across multiple roles
 
 ---
 
 ## License / usage
 
-Use this repo as a starter for your own agentic systems, internal operator tools, or experimental SaaS automation stacks.
+Use freely as a starter for your agentic systems, internal operator tools, or experimental product automation stacks.

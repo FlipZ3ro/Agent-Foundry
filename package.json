@@ -11,15 +11,20 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "build:core": "tsc -p tsconfig.build.json",
-    "lint": "echo 'lint pending'",
-    "test": "node --test --test-timeout=20000 --import tsx 'tests/**/*.test.ts'",
-    "api": "node --import tsx services/http/src/app.ts",
-    "demo": "npm run build:core && node dist/services/orchestrator/src/demo.js"
+    "lint": "eslint .",
+    "test": "node --test --test-timeout=20000 --import tsx tests/**/*.test.ts",
+    "api": "node --env-file=.env --import tsx services/http/src/app.ts",
+    "dashboard": "npm --workspace @agentic-factory/dashboard run dev",
+    "dashboard:build": "npm --workspace @agentic-factory/dashboard run build",
+    "demo": "npm run build:core && node --env-file=.env dist/services/orchestrator/src/demo.js"
   },
   "devDependencies": {
+    "@eslint/js": "^9.18.0",
     "@types/express": "^5.0.6",
+    "eslint": "^9.18.0",
     "express": "^5.2.1",
     "tsx": "^4.22.4",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.20.0"
   }
 }

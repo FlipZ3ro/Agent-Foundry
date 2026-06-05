@@ -16,5 +16,8 @@
     "packages/*/src/**/*.ts",
     "services/*/src/**/*.ts",
     "apps/*/src/**/*.ts"
+  ],
+  "exclude": [
+    "apps/dashboard/**"
   ]
 }
