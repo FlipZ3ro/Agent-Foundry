@@ -110,8 +110,12 @@ This turns a vague “AI app builder” into a structured system.
 ## Core idea
 
 <p align="center">
-  <img src="./assets/architecture.svg" alt="Agent Foundry architecture" width="100%" />
+  <img src="./assets/architecture.svg" alt="Agent Foundry architecture" width="720" />
 </p>
+
+> Architecture style uses a VoltAgent-style hardcore devtools look:
+> near-black canvas `#050507`, carbon surfaces `#101010`, warm charcoal containment `#3d3a39`,
+> and a single signal accent in emerald `#00d992`.
 
 The point is not complexity.
 

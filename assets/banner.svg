@@ -1,53 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 420" width="1280" height="420">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 460" width="1280" height="460">
   <defs>
-    <linearGradient id="line" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#0a72ef"/>
-      <stop offset="50%" stop-color="#de1d8d"/>
-      <stop offset="100%" stop-color="#ff5b4f"/>
+    <linearGradient id="green" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00d992"/>
+      <stop offset="100%" stop-color="#00f584"/>
     </linearGradient>
-    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.04"/>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#00d992" flood-opacity="0.35"/>
     </filter>
   </defs>
 
-  <rect width="1280" height="420" rx="20" fill="#ffffff"/>
-  <rect x="1" y="1" width="1278" height="418" rx="19" fill="none" stroke="#ebebeb"/>
+  <rect width="1280" height="460" rx="20" fill="#050507"/>
+  <rect x="1" y="1" width="1278" height="458" rx="19" fill="none" stroke="#3d3a39"/>
 
-  <!-- subtle top pill -->
-  <rect x="499" y="58" width="282" height="28" rx="9999" fill="#fafafa" stroke="#ebebeb"/>
-  <text x="640" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#4d4d4d" letter-spacing="0.8">MULTI-AGENT PRODUCT OPERATING SYSTEM</text>
+  <!-- dot grid -->
+  <g fill="#3d3a39" opacity="0.55">
+    <g transform="translate(80,80)"><circle r="2"/><circle cx="28" r="2"/><circle cx="56" r="2"/><circle cx="84" r="2"/><circle cx="112" r="2"/><circle cx="140" r="2"/><circle cx="168" r="2"/><circle cx="196" r="2"/><circle cx="224" r="2"/><circle cx="252" r="2"/><circle cx="280" r="2"/><circle cx="308" r="2"/><circle cx="336" r="2"/><circle cx="364" r="2"/><circle cx="392" r="2"/><circle cx="420" r="2"/><circle cx="448" r="2"/><circle cx="476" r="2"/><circle cx="504" r="2"/><circle cx="532" r="2"/><circle cx="560" r="2"/><circle cx="588" r="2"/><circle cx="616" r="2"/><circle cx="644" r="2"/><circle cx="672" r="2"/><circle cx="700" r="2"/><circle cx="728" r="2"/><circle cx="756" r="2"/><circle cx="784" r="2"/><circle cx="812" r="2"/><circle cx="840" r="2"/><circle cx="868" r="2"/><circle cx="896" r="2"/><circle cx="924" r="2"/><circle cx="952" r="2"/><circle cx="980" r="2"/><circle cx="1008" r="2"/><circle cx="1036" r="2"/><circle cx="1064" r="2"/><circle cx="1092" r="2"/></g>
+  </g>
 
-  <!-- hero title -->
-  <text x="640" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="78" font-weight="600" fill="#171717" letter-spacing="-3.2">Agent Foundry</text>
-  <text x="640" y="214" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#4d4d4d">Build AI-operated products with explicit planning, routing, execution, and review.</text>
+  <!-- terminal hero -->
+  <rect x="120" y="70" width="1040" height="320" rx="12" fill="#101010" stroke="#3d3a39" stroke-width="2"/>
+  <circle cx="152" cy="98" r="5" fill="#fb565b"/>
+  <circle cx="170" cy="98" r="5" fill="#ffba00"/>
+  <circle cx="188" cy="98" r="5" fill="#00d992"/>
+  <text x="220" y="102" font-family="SFMono-Regular, Menlo, monospace" font-size="13" fill="#8b949e">agent-foundry</text>
 
-  <!-- workflow strip -->
-  <line x1="390" y1="252" x2="890" y2="252" stroke="url(#line)" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="390" cy="252" r="5" fill="#0a72ef"/>
-  <circle cx="557" cy="252" r="5" fill="#0a72ef"/>
-  <circle cx="723" cy="252" r="5" fill="#de1d8d"/>
-  <circle cx="890" cy="252" r="5" fill="#ff5b4f"/>
+  <line x1="120" y1="118" x2="1160" y2="118" stroke="#3d3a39"/>
 
-  <text x="390" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#0a72ef">PLAN</text>
-  <text x="557" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#0a72ef">ROUTE</text>
-  <text x="723" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#de1d8d">EXECUTE</text>
-  <text x="890" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#ff5b4f">REVIEW</text>
+  <text x="156" y="152" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#00d992">%</text>
+  <text x="176" y="152" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#f2f2f2">npm create agent-foundry@latest</text>
 
-  <!-- cards -->
-  <g filter="url(#softShadow)">
-    <rect x="188" y="322" width="280" height="58" rx="12" fill="#ffffff"/>
-    <rect x="188" y="322" width="280" height="58" rx="12" fill="none" stroke="#ebebeb"/>
-    <text x="214" y="344" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#666666">STACK</text>
-    <text x="214" y="366" font-family="Arial, sans-serif" font-size="18" font-weight="500" fill="#171717">TypeScript · Schemas · HTTP</text>
+  <text x="156" y="186" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> planning:        planner (strategy + decomposition)</text>
+  <text x="156" y="212" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> routing:         router (lane selection + job shape)</text>
+  <text x="156" y="238" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> execution:       workers (frontend / backend / research)</text>
+  <text x="156" y="264" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> review:          reviewer (pass / revise / fail)</text>
+  <text x="156" y="290" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#b8b3b0"> history:         run lifecycle + artifacts</text>
 
-    <rect x="500" y="322" width="280" height="58" rx="12" fill="#ffffff"/>
-    <rect x="500" y="322" width="280" height="58" rx="12" fill="none" stroke="#ebebeb"/>
-    <text x="526" y="344" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#666666">FLOW</text>
-    <text x="526" y="366" font-family="Arial, sans-serif" font-size="18" font-weight="500" fill="#171717">Planner → Router → Workers</text>
+  <text x="156" y="334" font-family="SFMono-Regular, Menlo, monospace" font-size="14" fill="#f2f2f2">agent-foundry &gt; <tspan fill="#00d992">ready</tspan></text>
+  <rect x="390" y="324" width="2" height="18" fill="#00d992" opacity="0.9"/>
 
-    <rect x="812" y="322" width="280" height="58" rx="12" fill="#ffffff"/>
-    <rect x="812" y="322" width="280" height="58" rx="12" fill="none" stroke="#ebebeb"/>
-    <text x="838" y="344" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#666666">USE CASE</text>
-    <text x="838" y="366" font-family="Arial, sans-serif" font-size="18" font-weight="500" fill="#171717">AI SaaS Factory / Agent Ops</text>
+  <text x="640" y="430" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="18" fill="#b8b3b0">Terminal-native multi-agent operating system for product creation.</text>
+
+  <g stroke="#00d992" stroke-opacity="0.2">
+    <line x1="140" y1="30" x2="140" y2="54"/>
+    <line x1="140" y1="30" x2="164" y2="30"/>
+    <line x1="1140" y1="30" x2="1140" y2="54"/>
+    <line x1="1140" y1="30" x2="1116" y2="30"/>
+    <line x1="140" y1="430" x2="140" y2="406"/>
+    <line x1="140" y1="430" x2="164" y2="430"/>
+    <line x1="1140" y1="430" x2="1140" y2="406"/>
+    <line x1="1140" y1="430" x2="1116" y2="430"/>
   </g>
 </svg>
