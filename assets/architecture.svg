@@ -1,113 +1,95 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" width="1200" height="760">
   <defs>
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
-    </pattern>
-    <marker id="arr-c" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#22d3ee"/></marker>
-    <marker id="arr-e" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#00F584"/></marker>
-    <marker id="arr-a" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#fbbf24"/></marker>
-    <marker id="arr-v" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a78bfa"/></marker>
-    <marker id="arr-r" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#fb7185"/></marker>
-    <marker id="arr-s" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/></marker>
-    <filter id="glow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="workflow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0a72ef"/>
+      <stop offset="60%" stop-color="#de1d8d"/>
+      <stop offset="100%" stop-color="#ff5b4f"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.04"/>
+    </filter>
   </defs>
 
-  <rect width="1200" height="760" fill="#020617" rx="16"/>
-  <rect width="1200" height="760" fill="url(#grid)" rx="16"/>
+  <rect width="1200" height="760" rx="16" fill="#ffffff"/>
+  <rect x="1" y="1" width="1198" height="758" rx="15" fill="none" stroke="#ebebeb"/>
 
-  <text x="600" y="42" text-anchor="middle" font-family="monospace" font-size="18" fill="#00F584" font-weight="700" letter-spacing="3">AGENT FOUNDRY ARCHITECTURE</text>
-  <line x1="420" y1="50" x2="780" y2="50" stroke="#00F584" opacity="0.35"/>
+  <text x="600" y="46" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="600" fill="#171717" letter-spacing="-0.8">Agent Foundry architecture</text>
+  <text x="600" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#666666">A minimal multi-agent system for planning, routing, execution, and review.</text>
 
-  <!-- arrows -->
-  <line x1="600" y1="104" x2="600" y2="152" stroke="#22d3ee" stroke-width="1.7" marker-end="url(#arr-c)"/>
-  <line x1="600" y1="234" x2="600" y2="282" stroke="#00F584" stroke-width="1.7" marker-end="url(#arr-e)"/>
-
-  <path d="M 600 364 L 270 364 L 270 402" fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arr-a)"/>
-  <path d="M 600 364 L 600 402" fill="none" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arr-v)"/>
-  <path d="M 600 364 L 930 364 L 930 402" fill="none" stroke="#fb7185" stroke-width="1.5" marker-end="url(#arr-r)"/>
-
-  <text x="435" y="350" font-family="monospace" font-size="9" fill="#fbbf24">route to one or more lanes</text>
-
-  <line x1="270" y1="468" x2="270" y2="520" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,4"/>
-  <line x1="600" y1="468" x2="600" y2="520" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,4"/>
-  <line x1="930" y1="468" x2="930" y2="520" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,4"/>
-  <line x1="270" y1="520" x2="930" y2="520" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4,4"/>
-  <line x1="600" y1="520" x2="600" y2="562" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4,4" marker-end="url(#arr-s)"/>
-  <text x="620" y="514" font-family="monospace" font-size="9" fill="#94a3b8">merge for review</text>
-
-  <line x1="600" y1="644" x2="600" y2="690" stroke="#22d3ee" stroke-width="1.7" marker-end="url(#arr-c)"/>
-
-  <!-- nodes -->
-  <rect x="390" y="62" width="420" height="42" rx="10" fill="#0f172a" stroke="#334155" stroke-width="1.2"/>
-  <text x="600" y="80" text-anchor="middle" font-family="monospace" font-size="13" fill="#e2e8f0" font-weight="700">INPUT</text>
-  <text x="600" y="95" text-anchor="middle" font-family="monospace" font-size="9" fill="#94a3b8">product idea · feature request · campaign brief · research ask</text>
-
-  <rect x="410" y="152" width="380" height="82" rx="12" fill="#0f172a"/>
-  <rect x="410" y="152" width="380" height="82" rx="12" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.6"/>
-  <text x="600" y="184" text-anchor="middle" font-family="monospace" font-size="18" fill="#e2e8f0" font-weight="800">Planner</text>
-  <text x="600" y="205" text-anchor="middle" font-family="monospace" font-size="10" fill="#22d3ee">strategy · decomposition · acceptance criteria</text>
-  <text x="600" y="220" text-anchor="middle" font-family="monospace" font-size="9" fill="#64748b">outputs project blueprint + task specs</text>
-
-  <rect x="410" y="282" width="380" height="82" rx="12" fill="#0f172a"/>
-  <rect x="410" y="282" width="380" height="82" rx="12" fill="rgba(6,78,59,0.4)" stroke="#00F584" stroke-width="1.6"/>
-  <text x="600" y="314" text-anchor="middle" font-family="monospace" font-size="18" fill="#e2e8f0" font-weight="800" filter="url(#glow)">Router</text>
-  <text x="600" y="335" text-anchor="middle" font-family="monospace" font-size="10" fill="#00F584">reasoning-heavy / execution-heavy / hybrid</text>
-  <text x="600" y="350" text-anchor="middle" font-family="monospace" font-size="9" fill="#64748b">decides lane, parallelism, and job shape</text>
-
-  <rect x="120" y="402" width="960" height="80" rx="14" fill="rgba(251,146,60,0.04)" stroke="#fb923c" stroke-width="1.2" stroke-dasharray="8,4"/>
-  <text x="600" y="422" text-anchor="middle" font-family="monospace" font-size="11" fill="#fb923c" font-weight="700">WORKER SWARM</text>
-
-  <rect x="170" y="408" width="200" height="60" rx="10" fill="#0f172a"/>
-  <rect x="170" y="408" width="200" height="60" rx="10" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1.5"/>
-  <text x="270" y="434" text-anchor="middle" font-family="monospace" font-size="14" fill="#e2e8f0" font-weight="700">Frontend Lane</text>
-  <text x="270" y="450" text-anchor="middle" font-family="monospace" font-size="9" fill="#fbbf24">landing · UI copy · README visuals</text>
-  <text x="270" y="462" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">worker(s)</text>
-
-  <rect x="500" y="408" width="200" height="60" rx="10" fill="#0f172a"/>
-  <rect x="500" y="408" width="200" height="60" rx="10" fill="rgba(76,29,149,0.4)" stroke="#a78bfa" stroke-width="1.5"/>
-  <text x="600" y="434" text-anchor="middle" font-family="monospace" font-size="14" fill="#e2e8f0" font-weight="700">Backend Lane</text>
-  <text x="600" y="450" text-anchor="middle" font-family="monospace" font-size="9" fill="#a78bfa">APIs · schemas · services · infra glue</text>
-  <text x="600" y="462" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">worker(s)</text>
-
-  <rect x="830" y="408" width="200" height="60" rx="10" fill="#0f172a"/>
-  <rect x="830" y="408" width="200" height="60" rx="10" fill="rgba(136,19,55,0.4)" stroke="#fb7185" stroke-width="1.5"/>
-  <text x="930" y="434" text-anchor="middle" font-family="monospace" font-size="14" fill="#e2e8f0" font-weight="700">Research Lane</text>
-  <text x="930" y="450" text-anchor="middle" font-family="monospace" font-size="9" fill="#fb7185">market scan · content · strategy inputs</text>
-  <text x="930" y="462" text-anchor="middle" font-family="monospace" font-size="8" fill="#64748b">worker(s)</text>
-
-  <circle cx="600" cy="520" r="10" fill="#0f172a" stroke="#94a3b8" stroke-width="1.2"/>
-
-  <rect x="380" y="562" width="440" height="82" rx="12" fill="#0f172a"/>
-  <rect x="380" y="562" width="440" height="82" rx="12" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1.6"/>
-  <text x="600" y="594" text-anchor="middle" font-family="monospace" font-size="18" fill="#e2e8f0" font-weight="800">Reviewer</text>
-  <text x="600" y="615" text-anchor="middle" font-family="monospace" font-size="10" fill="#22d3ee">pass / revise / fail</text>
-  <text x="600" y="630" text-anchor="middle" font-family="monospace" font-size="9" fill="#64748b">checks criteria, output quality, and contract completeness</text>
-
-  <rect x="400" y="690" width="400" height="46" rx="10" fill="#0f172a"/>
-  <rect x="400" y="690" width="400" height="46" rx="10" fill="rgba(30,41,59,0.5)" stroke="#94a3b8" stroke-width="1.5"/>
-  <text x="600" y="709" text-anchor="middle" font-family="monospace" font-size="13" fill="#e2e8f0" font-weight="700">Run History</text>
-  <text x="600" y="724" text-anchor="middle" font-family="monospace" font-size="9" fill="#64748b">jobs · results · retries · notes · lifecycle events</text>
-
-  <!-- side cards -->
-  <rect x="70" y="152" width="260" height="78" rx="10" fill="rgba(34,211,238,0.05)" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4,4"/>
-  <text x="200" y="176" text-anchor="middle" font-family="monospace" font-size="11" fill="#22d3ee" font-weight="700">Core principle</text>
-  <text x="200" y="194" text-anchor="middle" font-family="monospace" font-size="9" fill="#94a3b8">separate reasoning, routing, execution,</text>
-  <text x="200" y="208" text-anchor="middle" font-family="monospace" font-size="9" fill="#94a3b8">and review for cost + observability</text>
-
-  <rect x="870" y="152" width="260" height="78" rx="10" fill="rgba(0,245,132,0.05)" stroke="#00F584" stroke-width="1" stroke-dasharray="4,4"/>
-  <text x="1000" y="176" text-anchor="middle" font-family="monospace" font-size="11" fill="#00F584" font-weight="700">Current repo shape</text>
-  <text x="1000" y="194" text-anchor="middle" font-family="monospace" font-size="9" fill="#94a3b8">packages/schemas</text>
-  <text x="1000" y="208" text-anchor="middle" font-family="monospace" font-size="9" fill="#94a3b8">orchestrator · worker · reviewer · http</text>
-
-  <!-- legend -->
-  <g transform="translate(90, 748)" font-family="monospace">
-    <rect x="0" y="-10" width="10" height="10" rx="2" fill="rgba(8,51,68,0.4)" stroke="#22d3ee" stroke-width="1"/>
-    <text x="16" y="-2" font-size="8" fill="#94a3b8">planning/review</text>
-    <rect x="124" y="-10" width="10" height="10" rx="2" fill="rgba(6,78,59,0.4)" stroke="#00F584" stroke-width="1"/>
-    <text x="140" y="-2" font-size="8" fill="#94a3b8">routing/core</text>
-    <rect x="242" y="-10" width="10" height="10" rx="2" fill="rgba(120,53,15,0.3)" stroke="#fbbf24" stroke-width="1"/>
-    <text x="258" y="-2" font-size="8" fill="#94a3b8">worker lane</text>
-    <line x1="364" y1="-5" x2="384" y2="-5" stroke="#94a3b8" stroke-dasharray="4,4" stroke-width="1.2"/>
-    <text x="390" y="-2" font-size="8" fill="#94a3b8">merge/review path</text>
+  <g filter="url(#softShadow)">
+    <rect x="390" y="108" width="420" height="64" rx="12" fill="#ffffff"/>
+    <rect x="390" y="108" width="420" height="64" rx="12" fill="none" stroke="#ebebeb"/>
+    <text x="420" y="132" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#666666">INPUT</text>
+    <text x="420" y="156" font-family="Arial, sans-serif" font-size="20" font-weight="500" fill="#171717">Product idea, feature request, or research brief</text>
   </g>
+
+  <line x1="600" y1="172" x2="600" y2="214" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+
+  <g filter="url(#softShadow)">
+    <rect x="390" y="214" width="420" height="90" rx="12" fill="#ffffff"/>
+    <rect x="390" y="214" width="420" height="90" rx="12" fill="none" stroke="#ebebeb"/>
+    <text x="420" y="240" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#0a72ef">PLAN</text>
+    <text x="420" y="266" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#171717" letter-spacing="-1.2">Planner</text>
+    <text x="420" y="290" font-family="Arial, sans-serif" font-size="15" font-weight="400" fill="#4d4d4d">Turns requests into strategy, tasks, and acceptance criteria.</text>
+  </g>
+
+  <line x1="600" y1="304" x2="600" y2="346" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+
+  <g filter="url(#softShadow)">
+    <rect x="390" y="346" width="420" height="90" rx="12" fill="#ffffff"/>
+    <rect x="390" y="346" width="420" height="90" rx="12" fill="none" stroke="#ebebeb"/>
+    <text x="420" y="372" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#0a72ef">ROUTE</text>
+    <text x="420" y="398" font-family="Arial, sans-serif" font-size="28" font-weight="600" fill="#171717" letter-spacing="-1.2">Router</text>
+    <text x="420" y="422" font-family="Arial, sans-serif" font-size="15" font-weight="400" fill="#4d4d4d">Selects one or more lanes based on the job shape.</text>
+  </g>
+
+  <line x1="600" y1="436" x2="600" y2="470" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+  <line x1="270" y1="470" x2="930" y2="470" stroke="url(#workflow)" stroke-width="2" stroke-linecap="round"/>
+  <line x1="270" y1="470" x2="270" y2="500" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+  <line x1="600" y1="470" x2="600" y2="500" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+  <line x1="930" y1="470" x2="930" y2="500" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+
+  <g filter="url(#softShadow)">
+    <rect x="120" y="500" width="300" height="92" rx="12" fill="#ffffff"/>
+    <rect x="120" y="500" width="300" height="92" rx="12" fill="none" stroke="#ebebeb"/>
+    <text x="148" y="526" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#0a72ef">EXECUTE</text>
+    <text x="148" y="552" font-family="Arial, sans-serif" font-size="24" font-weight="600" fill="#171717" letter-spacing="-1">Frontend lane</text>
+    <text x="148" y="575" font-family="Arial, sans-serif" font-size="15" font-weight="400" fill="#4d4d4d">Landing pages, UI copy, and README visuals.</text>
+
+    <rect x="450" y="500" width="300" height="92" rx="12" fill="#ffffff"/>
+    <rect x="450" y="500" width="300" height="92" rx="12" fill="none" stroke="#ebebeb"/>
+    <text x="478" y="526" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#de1d8d">EXECUTE</text>
+    <text x="478" y="552" font-family="Arial, sans-serif" font-size="24" font-weight="600" fill="#171717" letter-spacing="-1">Backend lane</text>
+    <text x="478" y="575" font-family="Arial, sans-serif" font-size="15" font-weight="400" fill="#4d4d4d">Schemas, APIs, services, and orchestration logic.</text>
+
+    <rect x="780" y="500" width="300" height="92" rx="12" fill="#ffffff"/>
+    <rect x="780" y="500" width="300" height="92" rx="12" fill="none" stroke="#ebebeb"/>
+    <text x="808" y="526" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#ff5b4f">EXECUTE</text>
+    <text x="808" y="552" font-family="Arial, sans-serif" font-size="24" font-weight="600" fill="#171717" letter-spacing="-1">Research lane</text>
+    <text x="808" y="575" font-family="Arial, sans-serif" font-size="15" font-weight="400" fill="#4d4d4d">Market scan, content inputs, and strategy support.</text>
+  </g>
+
+  <line x1="270" y1="592" x2="270" y2="626" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+  <line x1="600" y1="592" x2="600" y2="626" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+  <line x1="930" y1="592" x2="930" y2="626" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+  <line x1="270" y1="626" x2="930" y2="626" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+  <line x1="600" y1="626" x2="600" y2="658" stroke="#171717" stroke-opacity="0.12" stroke-width="2"/>
+
+  <g filter="url(#softShadow)">
+    <rect x="390" y="658" width="420" height="72" rx="12" fill="#ffffff"/>
+    <rect x="390" y="658" width="420" height="72" rx="12" fill="none" stroke="#ebebeb"/>
+    <text x="420" y="684" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#ff5b4f">REVIEW</text>
+    <text x="420" y="710" font-family="Arial, sans-serif" font-size="24" font-weight="600" fill="#171717" letter-spacing="-1">Reviewer → Run history</text>
+    <text x="420" y="724" font-family="Arial, sans-serif" font-size="15" font-weight="400" fill="#4d4d4d">Evaluates output, routes revisions, and records lifecycle.</text>
+  </g>
+
+  <rect x="76" y="214" width="250" height="82" rx="12" fill="#fafafa" stroke="#ebebeb"/>
+  <text x="100" y="240" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#666666">WHY THIS SHAPE</text>
+  <text x="100" y="264" font-family="Arial, sans-serif" font-size="16" font-weight="500" fill="#171717">Separate reasoning from execution.</text>
+  <text x="100" y="286" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#4d4d4d">Lower cost and clearer observability.</text>
+
+  <rect x="874" y="214" width="250" height="82" rx="12" fill="#fafafa" stroke="#ebebeb"/>
+  <text x="898" y="240" font-family="Arial, sans-serif" font-size="12" font-weight="500" fill="#666666">CURRENT REPO</text>
+  <text x="898" y="264" font-family="Arial, sans-serif" font-size="16" font-weight="500" fill="#171717">Schemas + orchestrator + HTTP.</text>
+  <text x="898" y="286" font-family="Arial, sans-serif" font-size="14" font-weight="400" fill="#4d4d4d">Worker and review stages stay explicit.</text>
 </svg>
