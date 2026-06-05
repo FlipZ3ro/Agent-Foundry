@@ -1,5 +1,6 @@
 import { EventEmitter } from "node:events";
 import type {
+  Artifact,
   OrchestrationRun,
   ReviewDecision,
   RoutingDecision,
@@ -16,6 +17,7 @@ export type RunEvent =
   | { type: "task-started"; taskId: string; jobId: string }
   | { type: "task-completed"; taskId: string; result: WorkerResult }
   | { type: "task-reviewed"; taskId: string; review: ReviewDecision }
+  | { type: "artifacts-written"; artifacts: Artifact[] }
   | { type: "history"; entry: RunHistoryEntry }
   | { type: "done"; run: OrchestrationRun }
   | { type: "error"; message: string };

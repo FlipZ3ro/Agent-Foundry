@@ -31,7 +31,7 @@ const LANE_CONFIGS: LaneWorkerConfig[] = [
     outputDirective:
       "Reply with a tight 3-5 sentence brief covering: (1) component tree, (2) key state and props, (3) interaction flow, (4) any styling/UX notes worth flagging. No code blocks.",
     temperature: 0.55,
-    maxTokens: 1200
+    maxTokens: 4000
   },
   {
     lane: "backend",
@@ -40,7 +40,7 @@ const LANE_CONFIGS: LaneWorkerConfig[] = [
     outputDirective:
       "Reply with a tight brief covering: (1) endpoint contract (method + path + body shape), (2) data model touched, (3) error/validation strategy, (4) one observability hook. Be precise. No code blocks.",
     temperature: 0.35,
-    maxTokens: 1800
+    maxTokens: 5000
   },
   {
     lane: "data",
@@ -49,7 +49,7 @@ const LANE_CONFIGS: LaneWorkerConfig[] = [
     outputDirective:
       "Reply with a brief covering: (1) data sources, (2) schema/columns and keys, (3) ingestion/refresh cadence, (4) one quality check. Stay concrete. No code blocks.",
     temperature: 0.4,
-    maxTokens: 1500
+    maxTokens: 4500
   },
   {
     lane: "assets",
@@ -58,7 +58,7 @@ const LANE_CONFIGS: LaneWorkerConfig[] = [
     outputDirective:
       "Reply with a brief covering: (1) asset surfaces produced, (2) directory layout, (3) format/template choices, (4) one rendering or accessibility note.",
     temperature: 0.5,
-    maxTokens: 1200
+    maxTokens: 3500
   },
   {
     lane: "review",
@@ -67,7 +67,7 @@ const LANE_CONFIGS: LaneWorkerConfig[] = [
     outputDirective:
       "Reply with a brief covering: (1) what was tested, (2) edge cases covered, (3) tooling used (e.g., node:test, Playwright), (4) one risk still open. No code blocks.",
     temperature: 0.3,
-    maxTokens: 1800
+    maxTokens: 5000
   },
   {
     lane: "planner",
@@ -76,7 +76,7 @@ const LANE_CONFIGS: LaneWorkerConfig[] = [
     outputDirective:
       "Reply with a brief covering: (1) decision made, (2) impacted downstream tasks, (3) open question worth surfacing.",
     temperature: 0.4,
-    maxTokens: 1200
+    maxTokens: 2500
   },
   {
     lane: "router",
@@ -85,7 +85,7 @@ const LANE_CONFIGS: LaneWorkerConfig[] = [
     outputDirective:
       "Reply with a brief covering: (1) routing choice and why, (2) model tier rationale, (3) any rerouting risk.",
     temperature: 0.35,
-    maxTokens: 1000
+    maxTokens: 2000
   }
 ];
 

@@ -45,6 +45,32 @@ export function createApp(store: RunStore = new MemoryRunStore()) {
     res.json(store.queueStats());
   });
 
+  app.get("/runs/:id/artifacts", (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    if (!store.get(id)) {
+      res.status(404).json({ error: "Run not found" });
+      return;
+    }
+    res.json(store.artifacts.list(id));
+  });
+
+  app.get("/runs/:id/artifacts/:taskId/*splat", (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const taskId = String(req.params.taskId);
+    const splat = (req.params as Record<string, string | string[]>).splat;
+    const path = Array.isArray(splat) ? splat.join("/") : String(splat ?? "");
+    if (!store.get(id)) {
+      res.status(404).json({ error: "Run not found" });
+      return;
+    }
+    const content = store.artifacts.readContent(id, taskId, path);
+    if (content === undefined) {
+      res.status(404).json({ error: "Artifact not found" });
+      return;
+    }
+    res.type("text/plain").send(content);
+  });
+
   app.get("/runs/:id", (req: Request, res: Response) => {
     const entry = store.get(String(req.params.id));
     if (!entry) {

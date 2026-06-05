@@ -846,6 +846,75 @@ h3 .count-pill {
   background: rgba(56, 189, 248, 0.08);
 }
 
+/* ───── artifacts ───── */
+
+.artifact-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.artifact-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: border-color 120ms;
+}
+
+.artifact-card:hover {
+  border-color: var(--border-strong);
+}
+
+.artifact-head {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.artifact-task {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.artifact-path {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artifact-path:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.artifact-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.artifact-size {
+  font-size: 10.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.artifact-sha {
+  font-size: 10px;
+  letter-spacing: 0.02em;
+}
+
 /* ───── reviews ───── */
 
 .review-list {

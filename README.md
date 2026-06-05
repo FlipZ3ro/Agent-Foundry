@@ -65,6 +65,7 @@ Each layer falls back to a deterministic stub when no API key is set, so tests a
 | Async POST + SSE streaming to dashboard | done |
 | Lane-specific worker personas (frontend/backend/data/assets/review) | done |
 | In-process queue (p-queue) with concurrency cap + queue stats endpoint | done |
+| Artifact storage — workers write real files to disk per task | done |
 | CI workflow (`.github/workflows/test.yml`) | done |
 | ESLint flat config | done |
 | Multi-stage Dockerfile | done |
@@ -149,6 +150,8 @@ Endpoints:
 - `GET /runs/:id` — fetch full run (current state if in-flight)
 - `GET /runs/:id/stream` — Server-Sent Events: `queued`, `started`, `planned`, `routed`, `task-started`, `task-completed`, `task-reviewed`, `history`, `done`. The dashboard consumes this for live updates.
 - `GET /queue` — current `{ concurrency, size (waiting), pending (active), paused }`.
+- `GET /runs/:id/artifacts` — list artifacts produced by the run (`{ taskId, path, sizeBytes, sha256, contentType }`).
+- `GET /runs/:id/artifacts/:taskId/:path` — download the raw file content. Paths are validated (no traversal, no absolute paths) and stored under `./artifacts/<runId>/<taskId>/<path>`.
 - `POST /runs/:id/retry` — async retry; `?wait=true` blocks. Replays only the failed tasks (preserves approved ones).
 
 ### 4. Run the dashboard
@@ -356,7 +359,7 @@ Runs are persisted to the mounted `/data/runs` volume.
 - [ ] auth + team workspaces
 - [ ] billing / usage tracking
 - [x] MCP server exposing `/runs` to other agents (stdio; hosted SSE TBD)
-- [ ] artifact storage (worker-produced files actually written to disk)
+- [x] artifact storage (worker-produced files actually written to disk under ./artifacts/<runId>/<taskId>/, downloadable via /runs/:id/artifacts/:taskId/:path)
 
 ---
 

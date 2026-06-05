@@ -6,6 +6,7 @@ import type {
 } from "../../../packages/schemas/src/index.js";
 import {
   costForUsage,
+  extractJson,
   fromEnv,
   type ChatMessage,
   type ChatUsage,
@@ -13,6 +14,26 @@ import {
 } from "../../../packages/llm/src/index.js";
 import { renderPrompt, skillsForLane } from "../../../packages/prompts/src/index.js";
 import { getLaneConfig } from "./lanes.js";
+
+export interface PendingArtifact {
+  taskId: string;
+  path: string;
+  content: string;
+}
+
+export interface WorkerOutput {
+  result: WorkerResult;
+  pendingArtifacts: PendingArtifact[];
+}
+
+interface WorkerLlmShape {
+  summary: string;
+  files?: Array<{ path: string; content: string }>;
+}
+
+const ARTIFACTS_ENABLED = (process.env.WORKER_EMIT_ARTIFACTS ?? "true") !== "false";
+const MAX_FILES_PER_TASK = Number(process.env.WORKER_MAX_FILES ?? "5");
+const MAX_FILE_BYTES = Number(process.env.WORKER_MAX_FILE_BYTES ?? "8192");
 
 export { getLaneConfig, listLaneConfigs, type LaneWorkerConfig } from "./lanes.js";
 
@@ -33,7 +54,7 @@ export class WorkerExecutor {
     private readonly model = process.env.MIMO_WORKER_MODEL ?? "mimo-v2.5"
   ) {}
 
-  async run(job: WorkerJob, task: TaskSpec, ctx: RunContext): Promise<WorkerResult> {
+  async run(job: WorkerJob, task: TaskSpec, ctx: RunContext): Promise<WorkerOutput> {
     if (this.llm) {
       try {
         return await this.runWithLlm(job, task, ctx);
@@ -44,49 +65,81 @@ export class WorkerExecutor {
     return this.stubRun(job, task);
   }
 
-  private async runWithLlm(job: WorkerJob, task: TaskSpec, ctx: RunContext): Promise<WorkerResult> {
+  private async runWithLlm(job: WorkerJob, task: TaskSpec, ctx: RunContext): Promise<WorkerOutput> {
     const lane = getLaneConfig(task.lane);
     const skill = skillsForLane(task.lane)[0];
     const skillPrompt = skill ? renderPrompt(skill, { idea: ctx.idea }) : "";
     const acceptance = task.acceptanceCriteria.map((ac, i) => `${i + 1}. ${ac.description}`).join("\n");
     const model = lane.modelOverride ?? job.route.modelId ?? this.model;
+    const declared = task.outputs.slice(0, MAX_FILES_PER_TASK);
 
-    const messages: ChatMessage[] = [
-      {
-        role: "system",
-        content: `${lane.persona}\n\n${lane.outputDirective}\nNo prose preamble. No markdown code fences.`
-      },
-      {
-        role: "user",
-        content: `Idea: ${ctx.idea}
+    const systemPrompt = ARTIFACTS_ENABLED
+      ? `${lane.persona}\n\n${lane.outputDirective}\n\nAdditionally, emit real implementation content for the declared output files (TypeScript / Python / YAML / Markdown / SQL as appropriate). Each file's content must be a realistic, runnable starting point ≤ ${MAX_FILE_BYTES} bytes — no placeholders or "TODO" stubs. Cover at most ${MAX_FILES_PER_TASK} files. Respond ONLY as JSON:\n{"summary": "the brief", "files": [{"path": "src/foo.ts", "content": "actual code/text…"}]}\nIf a declared output is not produceable at this layer (e.g. binary), omit it from files but keep the path in summary.`
+      : `${lane.persona}\n\n${lane.outputDirective}\nNo prose preamble. No markdown code fences.`;
+
+    const userPrompt = `Idea: ${ctx.idea}
 Task: ${task.title}
 Objective: ${task.objective}
 Acceptance criteria:
 ${acceptance}
-${skillPrompt ? `\nSkill guidance:\n${skillPrompt}` : ""}`
-      }
+${declared.length ? `\nDeclared output paths (target file list):\n${declared.map((p) => `- ${p}`).join("\n")}` : ""}
+${skillPrompt ? `\nSkill guidance:\n${skillPrompt}` : ""}`;
+
+    const messages: ChatMessage[] = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
     ];
 
     const result = await this.llm!.chat(messages, {
       model,
       temperature: lane.temperature,
-      maxTokens: lane.maxTokens
+      maxTokens: lane.maxTokens,
+      jsonMode: ARTIFACTS_ENABLED
     });
 
+    let summary = result.content.trim();
+    let pendingArtifacts: PendingArtifact[] = [];
+
+    if (ARTIFACTS_ENABLED) {
+      try {
+        const parsed = extractJson<WorkerLlmShape>(result.content);
+        summary = (parsed.summary ?? summary).trim();
+        pendingArtifacts = (parsed.files ?? [])
+          .slice(0, MAX_FILES_PER_TASK)
+          .map((f) => ({
+            taskId: task.id,
+            path: f.path,
+            content: typeof f.content === "string" ? f.content.slice(0, MAX_FILE_BYTES) : ""
+          }))
+          .filter((a) => isSafePath(a.path) && a.content.length > 0);
+      } catch (err) {
+        const fallback = extractSummaryFromTruncated(result.content);
+        if (fallback) {
+          summary = fallback;
+        } else {
+          console.error(
+            "[worker] failed to parse JSON files block:",
+            err instanceof Error ? err.message : err
+          );
+        }
+      }
+    }
+
     const metrics = metricsFromUsage(model, result.usage, result.durationMs);
-    return {
+    const workerResult: WorkerResult = {
       jobId: job.id,
       taskId: task.id,
       lane: task.lane,
       status: "done",
-      summary: result.content.trim() || `Completed ${task.title}`,
+      summary: summary || `Completed ${task.title}`,
       producedFiles: task.outputs,
       metrics
     };
+    return { result: workerResult, pendingArtifacts };
   }
 
-  private stubRun(job: WorkerJob, task: TaskSpec): WorkerResult {
-    return {
+  private stubRun(job: WorkerJob, task: TaskSpec): WorkerOutput {
+    const result: WorkerResult = {
       jobId: job.id,
       taskId: task.id,
       lane: task.lane,
@@ -95,8 +148,34 @@ ${skillPrompt ? `\nSkill guidance:\n${skillPrompt}` : ""}`
       producedFiles: task.outputs,
       metrics: estimateMetrics(task)
     };
+    return { result, pendingArtifacts: [] };
   }
 }
+
+function extractSummaryFromTruncated(content: string): string | null {
+  const match = content.match(/"summary"\s*:\s*"([\s\S]*?)"\s*,\s*"files"/);
+  if (!match) return null;
+  return match[1]!.replace(/\\n/g, "\n").replace(/\\"/g, '"').trim();
+}
+
+const TRAVERSAL_RE = /(^|\/)\.\.(\/|$)/;
+function hasControlChar(s: string): boolean {
+  for (let i = 0; i < s.length; i++) if (s.charCodeAt(i) < 32) return true;
+  return false;
+}
+function isSafePathInternal(p: string): boolean {
+  if (typeof p !== "string" || p.length === 0 || p.length > 256) return false;
+  if (p.startsWith("/") || p.startsWith("\\")) return false;
+  if (/[A-Za-z]:[\\/]/.test(p)) return false;
+  if (TRAVERSAL_RE.test(p.replace(/\\/g, "/"))) return false;
+  return true;
+}
+
+function isSafePath(p: string): boolean {
+  return isSafePathInternal(p) && !hasControlChar(p);
+}
+
+export { isSafePath };
 
 function estimateMetrics(task: TaskSpec): JobMetrics {
   const tokensUsed =

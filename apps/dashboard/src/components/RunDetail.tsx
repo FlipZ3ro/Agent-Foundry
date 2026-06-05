@@ -128,6 +128,7 @@ export function RunDetail({ run, onRetry, live = false }: Props) {
                 <th>job</th>
                 <th>lane</th>
                 <th>summary</th>
+                <th>files</th>
                 <th>tokens</th>
                 <th>cost</th>
               </tr>
@@ -140,6 +141,7 @@ export function RunDetail({ run, onRetry, live = false }: Props) {
                     <span className={`chip lane-${r.lane}`}>{r.lane}</span>
                   </td>
                   <td>{r.summary}</td>
+                  <td className="num">{r.artifacts?.length ?? 0}</td>
                   <td className="num">{r.metrics?.tokensUsed ?? "—"}</td>
                   <td className="num">{r.metrics ? `$${r.metrics.costUsd.toFixed(4)}` : "—"}</td>
                 </tr>
@@ -149,6 +151,40 @@ export function RunDetail({ run, onRetry, live = false }: Props) {
         </div>
       </section>
       )}
+
+      {hasArtifacts(run) ? (
+        <section className="detail-section">
+          <h3>
+            artifacts <span className="count-pill">{countArtifacts(run)}</span>
+          </h3>
+          <ul className="artifact-list">
+            {run.results.flatMap((r) =>
+              (r.artifacts ?? []).map((a) => (
+                <li key={`${r.taskId}-${a.path}`} className="artifact-card">
+                  <div className="artifact-head">
+                    <span className="mono artifact-task">{r.taskId}</span>
+                    <a
+                      href={`/runs/${encodeURIComponent(run.id)}/artifacts/${encodeURIComponent(a.taskId)}/${a.path.split("/").map(encodeURIComponent).join("/")}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="artifact-path mono"
+                    >
+                      {a.path}
+                    </a>
+                    <span className="artifact-meta">
+                      <span className="artifact-size mono">{formatBytes(a.sizeBytes)}</span>
+                      <span className={`chip lane-${r.lane}`}>{r.lane}</span>
+                    </span>
+                  </div>
+                  <div className="muted artifact-sha mono" title={a.sha256}>
+                    sha256 · {a.sha256.slice(0, 16)}…
+                  </div>
+                </li>
+              ))
+            )}
+          </ul>
+        </section>
+      ) : null}
 
       {run.reviews.length === 0 ? null : (
       <section className="detail-section">
@@ -207,6 +243,20 @@ export function RunDetail({ run, onRetry, live = false }: Props) {
       </section>
     </div>
   );
+}
+
+function hasArtifacts(run: OrchestrationRun): boolean {
+  return run.results.some((r) => (r.artifacts?.length ?? 0) > 0);
+}
+
+function countArtifacts(run: OrchestrationRun): number {
+  return run.results.reduce((sum, r) => sum + (r.artifacts?.length ?? 0), 0);
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function Metric({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {

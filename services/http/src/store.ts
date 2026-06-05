@@ -5,9 +5,10 @@ import {
   type ProjectBlueprint,
   createRunId
 } from "../../../packages/schemas/src/index.js";
-import { Orchestrator, type ProgressCallback } from "../../orchestrator/src/index.js";
+import { Orchestrator, type OrchestratorOutput, type ProgressCallback } from "../../orchestrator/src/index.js";
 import { RunBus, type RunEvent } from "./run-bus.js";
 import { RunQueue, type QueueStats } from "./queue.js";
+import { ArtifactStore } from "./artifacts.js";
 
 export type StoredRun = { blueprint: ProjectBlueprint; run: OrchestrationRun };
 export type RunListItem = Pick<
@@ -22,9 +23,11 @@ export interface CreateOptions {
 export abstract class RunStore {
   readonly bus = new RunBus();
   readonly queue: RunQueue;
+  readonly artifacts: ArtifactStore;
 
-  constructor(queue?: RunQueue) {
+  constructor(queue?: RunQueue, artifacts?: ArtifactStore) {
     this.queue = queue ?? new RunQueue();
+    this.artifacts = artifacts ?? new ArtifactStore();
   }
 
   queueStats(): QueueStats {
@@ -146,7 +149,7 @@ export class MemoryRunStore extends RunStore {
   private scheduleRun(
     runId: string,
     slot: MemorySlot,
-    work: () => Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }>,
+    work: () => Promise<OrchestratorOutput>,
     options?: CreateOptions
   ): Promise<StoredRun> {
     const { queued, finished } = this.queue.enqueue(async () => {
@@ -156,11 +159,13 @@ export class MemoryRunStore extends RunStore {
       try {
         const created = await work();
         const completedAt = new Date().toISOString();
+        const enrichedResults = attachArtifacts(created.run.results, this.artifacts, runId, created.pendingArtifacts, this.bus);
         const merged: StoredRun = {
           blueprint: created.blueprint,
           run: {
             ...created.run,
             id: runId,
+            results: enrichedResults,
             startedAt,
             completedAt,
             retryOf: options?.retryOf
@@ -251,7 +256,7 @@ export class FileRunStore extends RunStore {
   private scheduleRun(
     runId: string,
     placeholder: StoredRun,
-    work: () => Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }>,
+    work: () => Promise<OrchestratorOutput>,
     options?: CreateOptions
   ): Promise<StoredRun> {
     const { queued, finished } = this.queue.enqueue(async () => {
@@ -262,11 +267,13 @@ export class FileRunStore extends RunStore {
       try {
         const created = await work();
         const completedAt = new Date().toISOString();
+        const enrichedResults = attachArtifacts(created.run.results, this.artifacts, runId, created.pendingArtifacts, this.bus);
         const merged: StoredRun = {
           blueprint: created.blueprint,
           run: {
             ...created.run,
             id: runId,
+            results: enrichedResults,
             startedAt,
             completedAt,
             retryOf: options?.retryOf
@@ -304,6 +311,29 @@ export class FileRunStore extends RunStore {
   private nextIndex(): number {
     return this.allStored().length + 1;
   }
+}
+
+function attachArtifacts(
+  results: import("../../../packages/schemas/src/index.js").WorkerResult[],
+  store: ArtifactStore,
+  runId: string,
+  pending: import("../../worker/src/index.js").PendingArtifact[],
+  bus: RunBus
+): import("../../../packages/schemas/src/index.js").WorkerResult[] {
+  if (pending.length === 0) return results;
+  const written = store.writeMany(runId, pending);
+  if (written.length === 0) return results;
+  bus.publish(runId, { type: "artifacts-written", artifacts: written });
+  const byTask = new Map<string, import("../../../packages/schemas/src/index.js").Artifact[]>();
+  for (const a of written) {
+    const list = byTask.get(a.taskId) ?? [];
+    list.push(a);
+    byTask.set(a.taskId, list);
+  }
+  return results.map((r) => {
+    const list = byTask.get(r.taskId);
+    return list && list.length > 0 ? { ...r, artifacts: list } : r;
+  });
 }
 
 function transitionTo(

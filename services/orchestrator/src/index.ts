@@ -23,7 +23,13 @@ export type ProgressEvent =
   | { type: "history"; entry: RunHistoryEntry };
 
 export type ProgressCallback = (event: ProgressEvent) => void;
-import { WorkerExecutor } from "../../worker/src/index.js";
+
+export interface OrchestratorOutput {
+  blueprint: ProjectBlueprint;
+  run: OrchestrationRun;
+  pendingArtifacts: PendingArtifact[];
+}
+import { WorkerExecutor, type PendingArtifact } from "../../worker/src/index.js";
 import { Reviewer } from "../../reviewer/src/index.js";
 import {
   extractJson,
@@ -219,7 +225,7 @@ export class Orchestrator {
   async run(
     idea: string,
     onProgress?: ProgressCallback
-  ): Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }> {
+  ): Promise<OrchestratorOutput> {
     const blueprint = await this.planner.createBlueprint(idea);
     const plannedAt = new Date().toISOString();
     const plannedEntry: RunHistoryEntry = {
@@ -249,12 +255,14 @@ export class Orchestrator {
     }));
 
     const results: WorkerResult[] = [];
+    const pendingArtifacts: PendingArtifact[] = [];
     for (const job of jobs) {
       const task = blueprint.tasks.find((item) => item.id === job.taskId)!;
       onProgress?.({ type: "task-started", taskId: task.id, jobId: job.id });
-      const result = await this.worker.run({ ...job, status: "in_progress" }, task, { idea });
-      results.push(result);
-      onProgress?.({ type: "task-completed", taskId: task.id, result });
+      const output = await this.worker.run({ ...job, status: "in_progress" }, task, { idea });
+      results.push(output.result);
+      pendingArtifacts.push(...output.pendingArtifacts);
+      onProgress?.({ type: "task-completed", taskId: task.id, result: output.result });
     }
 
     const executedEntry: RunHistoryEntry = {
@@ -293,13 +301,13 @@ export class Orchestrator {
       history: [plannedEntry, routedEntry, executedEntry, reviewedEntry]
     };
 
-    return { blueprint, run };
+    return { blueprint, run, pendingArtifacts };
   }
 
   async replay(
     parent: { blueprint: ProjectBlueprint; run: OrchestrationRun },
     onProgress?: ProgressCallback
-  ): Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }> {
+  ): Promise<OrchestratorOutput> {
     const { blueprint, run: parentRun } = parent;
     const failedTaskIds = new Set(
       parentRun.reviews.filter((review) => review.status !== "approved").map((review) => review.taskId)
@@ -310,6 +318,7 @@ export class Orchestrator {
     onProgress?.({ type: "routed", decisions: parentRun.routingDecisions });
 
     const results: WorkerResult[] = [];
+    const pendingArtifacts: PendingArtifact[] = [];
     for (const result of parentRun.results) {
       if (!replayAll && !failedTaskIds.has(result.taskId)) {
         results.push(result);
@@ -319,9 +328,10 @@ export class Orchestrator {
       const task = blueprint.tasks.find((item) => item.id === result.taskId)!;
       const job = parentRun.jobs.find((item) => item.taskId === result.taskId)!;
       onProgress?.({ type: "task-started", taskId: task.id, jobId: job.id });
-      const fresh = await this.worker.run({ ...job, status: "in_progress" }, task, { idea: parentRun.idea });
-      results.push(fresh);
-      onProgress?.({ type: "task-completed", taskId: task.id, result: fresh });
+      const output = await this.worker.run({ ...job, status: "in_progress" }, task, { idea: parentRun.idea });
+      results.push(output.result);
+      pendingArtifacts.push(...output.pendingArtifacts);
+      onProgress?.({ type: "task-completed", taskId: task.id, result: output.result });
     }
 
     const reviews: ReviewDecision[] = [];
@@ -359,7 +369,7 @@ export class Orchestrator {
       ]
     };
 
-    return { blueprint, run };
+    return { blueprint, run, pendingArtifacts };
   }
 }
 

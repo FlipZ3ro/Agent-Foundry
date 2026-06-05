@@ -17,4 +17,5 @@ __pycache__
 pnpm-lock.yaml
 yarn.lock
 runs/
+artifacts/
 *.tsbuildinfo

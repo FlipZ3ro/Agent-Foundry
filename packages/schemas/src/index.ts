@@ -62,6 +62,14 @@ export interface RunMetrics {
   changesRequestedCount: number;
 }
 
+export interface Artifact {
+  taskId: string;
+  path: string;
+  sizeBytes: number;
+  sha256: string;
+  contentType?: string;
+}
+
 export interface WorkerResult {
   jobId: string;
   taskId: string;
@@ -69,6 +77,7 @@ export interface WorkerResult {
   status: Exclude<JobStatus, "queued" | "routed" | "in_progress">;
   summary: string;
   producedFiles: string[];
+  artifacts?: Artifact[];
   metrics?: JobMetrics;
 }
 
