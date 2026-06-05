@@ -1,6 +1,6 @@
 # Agent Foundry
 
-> Working repo name: `agentic-saas-factory`
+> Repository: `FlipZ3ro/Agent-Foundry`
 
 Agent Foundry is a monorepo starter for building AI-operated SaaS systems with a simple execution model:
 
@@ -27,12 +27,6 @@ Other good options if you want alternatives:
 - **BuildSwarm**
 - **TaskForge**
 - **LaunchOS**
-
-If you want the cleanest branding, I’d rename the GitHub repo later to:
-
-- `agent-foundry`
-
----
 
 ## Core idea
 
@@ -124,7 +118,7 @@ These are placeholders for:
 ## Repo structure
 
 ```text
-agentic-saas-factory/
+Agent-Foundry/
 ├── apps/
 │   ├── dashboard/
 │   └── web/
@@ -356,13 +350,10 @@ This repo is being shaped around a few simple ideas:
 ## Suggested future rename
 
 Current repo name:
-- `agentic-saas-factory`
+- `Agent-Foundry`
 
-Recommended public-facing name:
+Public-facing name:
 - **Agent Foundry**
-
-Recommended GitHub repo rename later:
-- `agent-foundry`
 
 This keeps the branding simple while still matching the architecture.
 
