@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Icon } from "./Icon.js";
+import { Pipeline } from "./Pipeline.js";
+import { Topology } from "./Topology.js";
 import type { OrchestrationRun } from "../types.js";
 
 interface Props {
@@ -20,19 +22,25 @@ export function RunDetail({ run, onRetry, live = false }: Props) {
     }
   }
 
+  const tokens = run.metrics?.totalTokens ?? 0;
+  const cost = run.metrics?.totalCostUsd ?? 0;
+
   return (
     <div className="detail-body">
       <section className="hero">
         <div className="hero-row">
           <div className="hero-meta">
-            <span className="kicker">run</span>
-            <h1>{run.id}</h1>
+            <span className="kicker">live run · {run.id}</span>
+            <div className="hero-big">
+              {tokens > 0 ? tokens.toLocaleString() : "—"}
+              <span className="hero-big-unit">tokens</span>
+            </div>
             <p className="hero-idea">{run.idea}</p>
-            {run.retryOf ? (
-              <p className="muted" style={{ fontSize: 12, marginTop: 6 }}>
-                ↻ retry of <span className="mono">{run.retryOf}</span>
-              </p>
-            ) : null}
+            <div className="hero-tags">
+              <span className="hero-tag">${cost.toFixed(4)} spent</span>
+              <span className="hero-tag">{run.metrics?.jobCount ?? run.results.length} agents</span>
+              {run.retryOf ? <span className="hero-tag">↻ {run.retryOf}</span> : null}
+            </div>
           </div>
           <div className="hero-actions">
             <span className={`status status-${run.status}`}>
@@ -48,14 +56,28 @@ export function RunDetail({ run, onRetry, live = false }: Props) {
 
         {run.metrics ? (
           <div className="metric-strip">
-            <Metric label="tokens" value={run.metrics.totalTokens.toLocaleString()} accent />
-            <Metric label="cost" value={`$${run.metrics.totalCostUsd.toFixed(4)}`} accent />
-            <Metric label="jobs" value={String(run.metrics.jobCount)} />
-            <Metric label="approved" value={String(run.metrics.approvedCount)} />
+            <Metric label="top wins" value={String(run.metrics.approvedCount)} accent />
             <Metric label="changes" value={String(run.metrics.changesRequestedCount)} />
+            <Metric label="cost usd" value={`$${run.metrics.totalCostUsd.toFixed(4)}`} accent />
+            <Metric label="jobs" value={String(run.metrics.jobCount)} />
+            <Metric
+              label="avg score"
+              value={avgScore(run).toFixed(2)}
+            />
           </div>
         ) : null}
       </section>
+
+      <Pipeline run={run} live={live} />
+
+      {run.routingDecisions.length > 0 || run.results.length > 0 ? (
+        <section className="detail-section">
+          <h3>orchestration topology · {live ? "live" : "snapshot"}</h3>
+          <div className="topo-card">
+            <Topology run={run} live={live} />
+          </div>
+        </section>
+      ) : null}
 
       {live && run.routingDecisions.length === 0 ? (
         <div className="card empty live-skeleton">
@@ -243,6 +265,12 @@ export function RunDetail({ run, onRetry, live = false }: Props) {
       </section>
     </div>
   );
+}
+
+function avgScore(run: OrchestrationRun): number {
+  const scored = run.reviews.filter((r) => typeof r.overallScore === "number");
+  if (scored.length === 0) return 0;
+  return scored.reduce((s, r) => s + (r.overallScore ?? 0), 0) / scored.length;
 }
 
 function hasArtifacts(run: OrchestrationRun): boolean {
