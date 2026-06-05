@@ -62,6 +62,7 @@ Each layer falls back to a deterministic stub when no API key is set, so tests a
 | MCP server (stdio) exposing runs as tools | done |
 | Model-aware router (tier-based model selection) | done |
 | Rubric scoring per acceptance criterion | done |
+| Async POST + SSE streaming to dashboard | done |
 | CI workflow (`.github/workflows/test.yml`) | done |
 | ESLint flat config | done |
 | Multi-stage Dockerfile | done |
@@ -141,10 +142,11 @@ npm run api
 Listens on `http://localhost:3210`. Persists runs to `./runs/*.json`.
 
 Endpoints:
-- `POST /runs` — create a run from an idea
+- `POST /runs` — create a run from an idea. Returns 202 + `{ id, status: "running" }` immediately. Add `?wait=true` to block until completion (returns 201 + full run; used by SDK and MCP server).
 - `GET /runs` — list summaries
-- `GET /runs/:id` — fetch full run
-- `POST /runs/:id/retry` — replay only the failed tasks (preserves approved ones)
+- `GET /runs/:id` — fetch full run (current state if in-flight)
+- `GET /runs/:id/stream` — Server-Sent Events: `planned`, `routed`, `task-started`, `task-completed`, `task-reviewed`, `history`, `done`. The dashboard consumes this for live updates.
+- `POST /runs/:id/retry` — async retry; `?wait=true` blocks. Replays only the failed tasks (preserves approved ones).
 
 ### 4. Run the dashboard
 
@@ -345,7 +347,7 @@ Runs are persisted to the mounted `/data/runs` volume.
 - [x] model-aware router policies (tier-based: execution→fast, hybrid→standard, reasoning→pro)
 - [ ] queue-backed execution for long pipelines
 - [x] richer reviewer rules with rubric scoring (0–5 per criterion, weighted average)
-- [ ] streaming run updates to the dashboard
+- [x] streaming run updates to the dashboard (SSE; planned/routed/task-started/task-completed/task-reviewed/done events)
 
 ### Phase 4 — Productization
 - [ ] auth + team workspaces

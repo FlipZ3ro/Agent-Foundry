@@ -31,6 +31,10 @@ export class AgentFoundryClient {
   }
 
   createRun(idea: string): Promise<OrchestrationRun> {
+    return this.request<OrchestrationRun>("POST", "/runs?wait=true", { idea });
+  }
+
+  createRunAsync(idea: string): Promise<OrchestrationRun> {
     return this.request<OrchestrationRun>("POST", "/runs", { idea });
   }
 
@@ -43,7 +47,16 @@ export class AgentFoundryClient {
   }
 
   retryRun(id: string): Promise<OrchestrationRun> {
+    return this.request<OrchestrationRun>("POST", `/runs/${encodeURIComponent(id)}/retry?wait=true`);
+  }
+
+  retryRunAsync(id: string): Promise<OrchestrationRun> {
     return this.request<OrchestrationRun>("POST", `/runs/${encodeURIComponent(id)}/retry`);
+  }
+
+  /** Build the SSE URL for a run. Consume with new EventSource(this url). */
+  streamUrl(id: string): string {
+    return `${this.baseUrl}/runs/${encodeURIComponent(id)}/stream`;
   }
 
   private async request<T>(method: string, path: string, body?: unknown): Promise<T> {

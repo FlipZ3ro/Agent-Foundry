@@ -15,8 +15,8 @@ after(async () => {
 });
 
 describe("Agent Foundry HTTP API", () => {
-  it("creates a run", async () => {
-    const response = await fetch(`${baseUrl}/runs`, {
+  it("creates a run (sync via ?wait=true)", async () => {
+    const response = await fetch(`${baseUrl}/runs?wait=true`, {
       method: "POST",
       headers: JSON_HEADERS,
       body: JSON.stringify({ idea: "Build an AI factory MVP" })
@@ -32,8 +32,20 @@ describe("Agent Foundry HTTP API", () => {
     assert.ok(run.completedAt);
   });
 
-  it("rejects missing ideas", async () => {
+  it("creates a run async returns 202 + running status", async () => {
     const response = await fetch(`${baseUrl}/runs`, {
+      method: "POST",
+      headers: JSON_HEADERS,
+      body: JSON.stringify({ idea: "Async run" })
+    });
+    assert.equal(response.status, 202);
+    const run = await response.json();
+    assert.ok(run.id);
+    assert.equal(run.status, "running");
+  });
+
+  it("rejects missing ideas", async () => {
+    const response = await fetch(`${baseUrl}/runs?wait=true`, {
       method: "POST",
       headers: JSON_HEADERS,
       body: JSON.stringify({ idea: "" })
@@ -55,7 +67,7 @@ describe("Agent Foundry HTTP API", () => {
 
   it("gets a run by id", async () => {
     const created = await (
-      await fetch(`${baseUrl}/runs`, {
+      await fetch(`${baseUrl}/runs?wait=true`, {
         method: "POST",
         headers: JSON_HEADERS,
         body: JSON.stringify({ idea: "List run by id" })
@@ -73,21 +85,62 @@ describe("Agent Foundry HTTP API", () => {
     assert.equal(response.status, 404);
   });
 
-  it("retries a run", async () => {
+  it("retries a run (sync via ?wait=true)", async () => {
     const created = await (
-      await fetch(`${baseUrl}/runs`, {
+      await fetch(`${baseUrl}/runs?wait=true`, {
         method: "POST",
         headers: JSON_HEADERS,
         body: JSON.stringify({ idea: "Retry flow" })
       })
     ).json();
 
-    const response = await fetch(`${baseUrl}/runs/${created.id}/retry`, { method: "POST" });
+    const response = await fetch(`${baseUrl}/runs/${created.id}/retry?wait=true`, { method: "POST" });
     assert.equal(response.status, 201);
     const retried = await response.json();
     assert.ok(retried.id);
     assert.notEqual(retried.id, created.id);
     assert.equal(retried.idea, created.idea);
     assert.equal(retried.retryOf, created.id);
+  });
+
+  it("streams events via SSE and terminates on done", async () => {
+    const created = await (
+      await fetch(`${baseUrl}/runs`, {
+        method: "POST",
+        headers: JSON_HEADERS,
+        body: JSON.stringify({ idea: "Stream me" })
+      })
+    ).json();
+
+    const response = await fetch(`${baseUrl}/runs/${created.id}/stream`);
+    assert.equal(response.status, 200);
+    assert.ok(response.headers.get("content-type")?.includes("text/event-stream"));
+
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    const events: string[] = [];
+    let buf = "";
+    let sawDone = false;
+    while (!sawDone) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let idx;
+      while ((idx = buf.indexOf("\n\n")) !== -1) {
+        const chunk = buf.slice(0, idx);
+        buf = buf.slice(idx + 2);
+        for (const line of chunk.split("\n")) {
+          if (line.startsWith("event: ")) events.push(line.slice("event: ".length));
+        }
+        if (chunk.includes("event: done")) {
+          sawDone = true;
+          break;
+        }
+      }
+    }
+    await reader.cancel().catch(() => undefined);
+
+    assert.ok(events.includes("planned"), `expected 'planned' in ${events.join(",")}`);
+    assert.ok(events.includes("done"), `expected 'done' in ${events.join(",")}`);
   });
 });

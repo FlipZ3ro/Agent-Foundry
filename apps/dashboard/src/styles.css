@@ -161,6 +161,62 @@ body {
   padding: 2px 6px;
 }
 
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(52, 226, 164, 0.3);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+.live-dot,
+.live-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: live-pulse 1.6s ease-in-out infinite;
+}
+
+.live-pulse {
+  margin-left: 6px;
+}
+
+@keyframes live-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.55; }
+}
+
+.live-counter {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 1px solid rgba(52, 226, 164, 0.3);
+  border-radius: 999px;
+  padding: 1px 8px;
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.live-skeleton {
+  border-style: dashed;
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
 /* ───── buttons ───── */
 
 button {

@@ -5,9 +5,10 @@ import type { OrchestrationRun } from "../types.js";
 interface Props {
   run: OrchestrationRun;
   onRetry: (id: string) => Promise<void>;
+  live?: boolean;
 }
 
-export function RunDetail({ run, onRetry }: Props) {
+export function RunDetail({ run, onRetry, live = false }: Props) {
   const [retrying, setRetrying] = useState(false);
 
   async function handleRetry() {
@@ -34,8 +35,11 @@ export function RunDetail({ run, onRetry }: Props) {
             ) : null}
           </div>
           <div className="hero-actions">
-            <span className={`status status-${run.status}`}>{run.status}</span>
-            <button className="primary" onClick={handleRetry} disabled={retrying}>
+            <span className={`status status-${run.status}`}>
+              {run.status}
+              {live ? <span className="live-pulse" /> : null}
+            </span>
+            <button className="primary" onClick={handleRetry} disabled={retrying || live}>
               <Icon name="retry" />
               {retrying ? "retrying" : "retry"}
             </button>
@@ -53,6 +57,15 @@ export function RunDetail({ run, onRetry }: Props) {
         ) : null}
       </section>
 
+      {live && run.routingDecisions.length === 0 ? (
+        <div className="card empty live-skeleton">
+          <Icon name="sparkle" className="empty-icon" />
+          <div className="empty-title">planning…</div>
+          <div className="empty-hint">MiMo is decomposing your idea into tasks</div>
+        </div>
+      ) : null}
+
+      {run.routingDecisions.length === 0 ? null : (
       <section className="detail-section">
         <h3>
           routing decisions <span className="count-pill">{run.routingDecisions.length}</span>
@@ -90,10 +103,17 @@ export function RunDetail({ run, onRetry }: Props) {
           </table>
         </div>
       </section>
+      )}
 
+      {run.results.length === 0 ? null : (
       <section className="detail-section">
         <h3>
           results <span className="count-pill">{run.results.length}</span>
+          {live && run.results.length < run.routingDecisions.length ? (
+            <span className="live-counter">
+              {run.results.length} / {run.routingDecisions.length}
+            </span>
+          ) : null}
         </h3>
         <div className="card">
           <table className="table">
@@ -122,10 +142,17 @@ export function RunDetail({ run, onRetry }: Props) {
           </table>
         </div>
       </section>
+      )}
 
+      {run.reviews.length === 0 ? null : (
       <section className="detail-section">
         <h3>
           reviews <span className="count-pill">{run.reviews.length}</span>
+          {live && run.reviews.length < run.routingDecisions.length ? (
+            <span className="live-counter">
+              {run.reviews.length} / {run.routingDecisions.length}
+            </span>
+          ) : null}
         </h3>
         <ul className="review-list">
           {run.reviews.map((rv) => (
@@ -155,6 +182,7 @@ export function RunDetail({ run, onRetry }: Props) {
           ))}
         </ul>
       </section>
+      )}
 
       <section className="detail-section">
         <h3>

@@ -2,6 +2,13 @@ import express, { type Request, type Response } from "express";
 import { pathToFileURL } from "node:url";
 import { FileRunStore, MemoryRunStore, RunStore } from "./store.js";
 
+const SSE_HEADERS = {
+  "Content-Type": "text/event-stream",
+  "Cache-Control": "no-cache, no-transform",
+  Connection: "keep-alive",
+  "X-Accel-Buffering": "no"
+} as const;
+
 export function createApp(store: RunStore = new MemoryRunStore()) {
   const app = express();
   app.use(express.json());
@@ -13,13 +20,21 @@ export function createApp(store: RunStore = new MemoryRunStore()) {
       return;
     }
 
-    try {
-      const { run } = await store.create(idea);
-      res.status(201).json(run);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "unknown error";
-      res.status(500).json({ error: message });
+    const wait = req.query.wait === "true" || req.query.wait === "1";
+    const placeholder = store.begin(idea);
+
+    if (wait) {
+      try {
+        const finished = await store.waitFor(placeholder.run.id);
+        res.status(201).json(finished?.run ?? placeholder.run);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "unknown error";
+        res.status(500).json({ error: message });
+      }
+      return;
     }
+
+    res.status(202).json(placeholder.run);
   });
 
   app.get("/runs", (_req: Request, res: Response) => {
@@ -37,17 +52,57 @@ export function createApp(store: RunStore = new MemoryRunStore()) {
   });
 
   app.post("/runs/:id/retry", async (req: Request, res: Response) => {
-    try {
-      const retried = await store.retry(String(req.params.id));
-      if (!retried) {
-        res.status(404).json({ error: "Run not found" });
-        return;
-      }
-      res.status(201).json(retried.run);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "unknown error";
-      res.status(500).json({ error: message });
+    const placeholder = store.beginRetry(String(req.params.id));
+    if (!placeholder) {
+      res.status(404).json({ error: "Run not found" });
+      return;
     }
+
+    const wait = req.query.wait === "true" || req.query.wait === "1";
+    if (wait) {
+      try {
+        const finished = await store.waitFor(placeholder.run.id);
+        res.status(201).json(finished?.run ?? placeholder.run);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : "unknown error";
+        res.status(500).json({ error: message });
+      }
+      return;
+    }
+
+    res.status(202).json(placeholder.run);
+  });
+
+  app.get("/runs/:id/stream", (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const entry = store.get(id);
+    if (!entry) {
+      res.status(404).json({ error: "Run not found" });
+      return;
+    }
+
+    res.writeHead(200, SSE_HEADERS);
+    res.write(`retry: 2000\n\n`);
+
+    const heartbeat = setInterval(() => {
+      res.write(`: ping\n\n`);
+    }, 15_000);
+    heartbeat.unref?.();
+
+    const unsubscribe = store.bus.subscribe(id, (event) => {
+      res.write(`event: ${event.type}\n`);
+      res.write(`data: ${JSON.stringify(event)}\n\n`);
+      if (event.type === "done" || event.type === "error") {
+        clearInterval(heartbeat);
+        unsubscribe();
+        res.end();
+      }
+    });
+
+    req.on("close", () => {
+      clearInterval(heartbeat);
+      unsubscribe();
+    });
   });
 
   return app;

@@ -7,11 +7,22 @@ import {
   type ProjectBlueprint,
   type ReviewDecision,
   type RoutingDecision,
+  type RunHistoryEntry,
   type RunMetrics,
   type TaskSpec,
   type WorkerJob,
   type WorkerResult
 } from "../../../packages/schemas/src/index.js";
+
+export type ProgressEvent =
+  | { type: "planned"; tasks: TaskSpec[]; summary: string }
+  | { type: "routed"; decisions: RoutingDecision[] }
+  | { type: "task-started"; taskId: string; jobId: string }
+  | { type: "task-completed"; taskId: string; result: WorkerResult }
+  | { type: "task-reviewed"; taskId: string; review: ReviewDecision }
+  | { type: "history"; entry: RunHistoryEntry };
+
+export type ProgressCallback = (event: ProgressEvent) => void;
 import { WorkerExecutor } from "../../worker/src/index.js";
 import { Reviewer } from "../../reviewer/src/index.js";
 import {
@@ -205,9 +216,29 @@ export class Orchestrator {
     private readonly planner = new Planner()
   ) {}
 
-  async run(idea: string): Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }> {
+  async run(
+    idea: string,
+    onProgress?: ProgressCallback
+  ): Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }> {
     const blueprint = await this.planner.createBlueprint(idea);
+    const plannedAt = new Date().toISOString();
+    const plannedEntry: RunHistoryEntry = {
+      at: plannedAt,
+      stage: "planned",
+      detail: `Planner created ${blueprint.tasks.length} tasks: ${blueprint.summary}`
+    };
+    onProgress?.({ type: "planned", tasks: blueprint.tasks, summary: blueprint.summary });
+    onProgress?.({ type: "history", entry: plannedEntry });
+
     const routingDecisions = blueprint.tasks.map((task) => this.router.decide(task));
+    const routedAt = new Date().toISOString();
+    const routedEntry: RunHistoryEntry = {
+      at: routedAt,
+      stage: "routed",
+      detail: `Router classified ${routingDecisions.length} tasks into execution modes.`
+    };
+    onProgress?.({ type: "routed", decisions: routingDecisions });
+    onProgress?.({ type: "history", entry: routedEntry });
 
     const jobs: WorkerJob[] = blueprint.tasks.map((task, index) => ({
       id: `job-${index + 1}`,
@@ -220,15 +251,34 @@ export class Orchestrator {
     const results: WorkerResult[] = [];
     for (const job of jobs) {
       const task = blueprint.tasks.find((item) => item.id === job.taskId)!;
-      results.push(await this.worker.run({ ...job, status: "in_progress" }, task, { idea }));
+      onProgress?.({ type: "task-started", taskId: task.id, jobId: job.id });
+      const result = await this.worker.run({ ...job, status: "in_progress" }, task, { idea });
+      results.push(result);
+      onProgress?.({ type: "task-completed", taskId: task.id, result });
     }
+
+    const executedEntry: RunHistoryEntry = {
+      at: new Date().toISOString(),
+      stage: "executed",
+      detail: `Worker layer completed ${results.length} jobs.`
+    };
+    onProgress?.({ type: "history", entry: executedEntry });
 
     const reviews: ReviewDecision[] = [];
     for (let i = 0; i < results.length; i++) {
       const result = results[i]!;
       const task = blueprint.tasks.find((item) => item.id === result.taskId)!;
-      reviews.push(await this.reviewer.review(result, task));
+      const review = await this.reviewer.review(result, task);
+      reviews.push(review);
+      onProgress?.({ type: "task-reviewed", taskId: task.id, review });
     }
+
+    const reviewedEntry: RunHistoryEntry = {
+      at: new Date().toISOString(),
+      stage: "reviewed",
+      detail: `Reviewer returned ${reviews.length} decisions (${reviews.filter((r) => r.status === "approved").length} approved).`
+    };
+    onProgress?.({ type: "history", entry: reviewedEntry });
 
     const run: OrchestrationRun = {
       id: createRunId(1),
@@ -240,35 +290,15 @@ export class Orchestrator {
       results,
       reviews,
       metrics: aggregateMetrics(results, reviews),
-      history: [
-        {
-          at: new Date().toISOString(),
-          stage: "planned",
-          detail: `Planner created ${blueprint.tasks.length} tasks: ${blueprint.summary}`
-        },
-        {
-          at: new Date().toISOString(),
-          stage: "routed",
-          detail: `Router classified ${routingDecisions.length} tasks into execution modes.`
-        },
-        {
-          at: new Date().toISOString(),
-          stage: "executed",
-          detail: `Worker layer completed ${results.length} jobs.`
-        },
-        {
-          at: new Date().toISOString(),
-          stage: "reviewed",
-          detail: `Reviewer returned ${reviews.length} decisions (${reviews.filter((r) => r.status === "approved").length} approved).`
-        }
-      ]
+      history: [plannedEntry, routedEntry, executedEntry, reviewedEntry]
     };
 
     return { blueprint, run };
   }
 
   async replay(
-    parent: { blueprint: ProjectBlueprint; run: OrchestrationRun }
+    parent: { blueprint: ProjectBlueprint; run: OrchestrationRun },
+    onProgress?: ProgressCallback
   ): Promise<{ blueprint: ProjectBlueprint; run: OrchestrationRun }> {
     const { blueprint, run: parentRun } = parent;
     const failedTaskIds = new Set(
@@ -276,21 +306,30 @@ export class Orchestrator {
     );
     const replayAll = failedTaskIds.size === 0;
 
+    onProgress?.({ type: "planned", tasks: blueprint.tasks, summary: blueprint.summary });
+    onProgress?.({ type: "routed", decisions: parentRun.routingDecisions });
+
     const results: WorkerResult[] = [];
     for (const result of parentRun.results) {
       if (!replayAll && !failedTaskIds.has(result.taskId)) {
         results.push(result);
+        onProgress?.({ type: "task-completed", taskId: result.taskId, result });
         continue;
       }
       const task = blueprint.tasks.find((item) => item.id === result.taskId)!;
       const job = parentRun.jobs.find((item) => item.taskId === result.taskId)!;
-      results.push(await this.worker.run({ ...job, status: "in_progress" }, task, { idea: parentRun.idea }));
+      onProgress?.({ type: "task-started", taskId: task.id, jobId: job.id });
+      const fresh = await this.worker.run({ ...job, status: "in_progress" }, task, { idea: parentRun.idea });
+      results.push(fresh);
+      onProgress?.({ type: "task-completed", taskId: task.id, result: fresh });
     }
 
     const reviews: ReviewDecision[] = [];
     for (const result of results) {
       const task = blueprint.tasks.find((item) => item.id === result.taskId)!;
-      reviews.push(await this.reviewer.review(result, task));
+      const review = await this.reviewer.review(result, task);
+      reviews.push(review);
+      onProgress?.({ type: "task-reviewed", taskId: task.id, review });
     }
 
     const retriedCount = replayAll ? results.length : failedTaskIds.size;
